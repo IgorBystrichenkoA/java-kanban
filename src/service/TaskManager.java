@@ -1,8 +1,8 @@
-package Service;
+package service;
 
-import Model.Epic;
-import Model.Subtask;
-import Model.Task;
+import model.Epic;
+import model.Subtask;
+import model.Task;
 
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +83,7 @@ public class TaskManager {
     public Subtask createSubtask(Subtask subtask) {
         Epic epicFromManager = subtask.getEpic();
         // Если предложенного эпика нет в таблице, то подзадачу не создаем
-        if (epics.get(epicFromManager.getId()) == null) {
+        if (!epics.containsKey(epicFromManager.getId())) {
             return null;
         }
         subtask.setId(generateId());

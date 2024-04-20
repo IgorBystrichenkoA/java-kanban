@@ -1,4 +1,4 @@
-package Model;
+package model;
 
 import java.util.HashSet;
 import java.util.List;
@@ -6,16 +6,14 @@ import java.util.Set;
 
 public class Epic extends Task {
 
-    private final Set<Subtask> subtasks;
+    private final Set<Subtask> subtasks = new HashSet<>();
 
     public Epic(String name, String description) {
         super(name, description, Status.NEW);
-        subtasks = new HashSet<>();
     }
 
     public Epic(int id, String name, String description) {
         super(id, name, description, Status.NEW);
-        subtasks = new HashSet<>();
     }
 
     public void addSubtask(Subtask subtask) {
