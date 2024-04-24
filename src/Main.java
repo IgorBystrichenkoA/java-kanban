@@ -2,29 +2,52 @@ import model.Epic;
 import model.Status;
 import model.Subtask;
 import model.Task;
+import service.Managers;
 import service.TaskManager;
 
 import java.util.List;
 
 public class Main {
-
     public static void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
+        TaskManager manager = Managers.getDefault();
 
-        createTest(taskManager);
-        updateTest(taskManager);
-        printTest(taskManager);
-        deleteTest(taskManager);
-        printTest(taskManager);
+        createTest(manager);
 
+        List<Task> tasks = manager.getAllTasks();
+        List<Epic> epics = manager.getAllEpics();
+        List<Subtask> subtasks = manager.getAllSubtasks();
+
+        Task task = tasks.get((int)(Math.random() * tasks.size()));
+        Epic epic = epics.get((int)(Math.random() * epics.size()));
+        Subtask subtask = subtasks.get((int)(Math.random() * subtasks.size()));
+
+        task = manager.getTask(task.getId());
+        System.out.println("Get task: " + task);
+        epic = manager.getEpic(epic.getId());
+        System.out.println("Get epic: " + epic);
+        subtask = manager.getSubtask(subtask.getId());
+        System.out.println("Get subtask: " + subtask);
+        task = manager.getTask(task.getId());
+        System.out.println("Get task: " + task);
+
+        printHistory(manager);
     }
 
+    private static void printHistory(TaskManager manager) {
+        System.out.println("История:");
+        for (Task task : manager.getHistory()) {
+            System.out.println(task);
+        }
+    }
     private static void createTest(TaskManager taskManager) {
         Task task1 = taskManager.createTask(new Task("Задача 1", "Описание 1.1", Status.NEW));
         System.out.println("Create task " + task1);
 
         Task task2 = taskManager.createTask(new Task("Задача 2", "Описание 2.1", Status.IN_PROGRESS));
         System.out.println("Create task " + task2);
+
+        Task task3 = taskManager.createTask(new Task("Задача 3", "Описание 3.1", Status.DONE));
+        System.out.println("Create task " + task3);
 
         Epic epic1 = taskManager.createEpic(new Epic("Эпик 1", "Описание эпика 1.1"));
         System.out.println("Create epic " + epic1);
@@ -47,63 +70,4 @@ public class Main {
         System.out.println();
     }
 
-    private static void printTest(TaskManager taskManager) {
-        List<Task> tasks = taskManager.getAllTasks();
-        for (Task task : tasks) {
-            System.out.println(task);
-        }
-
-        List<Epic> epics = taskManager.getAllEpics();
-        for (Epic epic : epics) {
-            System.out.println(epic);
-        }
-
-        List<Subtask> subtasks = taskManager.getAllSubtasks();
-        for (Subtask subtask : subtasks) {
-            System.out.println(subtask);
-        }
-
-        System.out.println();
-    }
-
-    private static void updateTest(TaskManager taskManager) {
-        List<Task> tasks = taskManager.getAllTasks();
-        for (Task taskFromManager : tasks) {
-            // Меняем статус на следующий по порядку
-            int ord = taskFromManager.getStatus().ordinal();
-            ord = (ord + 1) % Status.values().length;
-            Task taskUpdated = new Task(taskFromManager.getId(), taskFromManager.getName(),
-                    taskFromManager.getDescription(), Status.values()[ord]);
-            taskManager.updateTask(taskUpdated);
-            System.out.println("Updated " + taskUpdated);
-        }
-
-        List<Subtask> subtasks = taskManager.getAllSubtasks();
-        for (Subtask subtaskFromManager : subtasks) {
-            int ord = subtaskFromManager.getStatus().ordinal();
-            ord = (ord + 1) % Status.values().length;
-            Subtask subtaskUpdated = new Subtask(subtaskFromManager.getId(), subtaskFromManager.getName(),
-                    subtaskFromManager.getDescription(), Status.values()[ord], subtaskFromManager.getEpic());
-            taskManager.updateSubtask(subtaskUpdated);
-            System.out.println("Updated " + subtaskUpdated);
-        }
-
-        System.out.println();
-    }
-
-    private static void deleteTest(TaskManager taskManager) {
-        Task taskFromManager = taskManager.getAllTasks().get(0);
-        taskManager.deleteTask(taskFromManager.getId());
-        System.out.println("Deleted task " + taskFromManager);
-
-        Epic epicFromManager = taskManager.getAllEpics().get(1);
-        taskManager.deleteEpic(epicFromManager.getId());
-        System.out.println("Deleted epic " + epicFromManager);
-
-        Subtask subtaskFromManager = taskManager.getAllSubtasks().get(1);
-        taskManager.deleteSubtask(subtaskFromManager.getId());
-        System.out.println("Deleted subtask " + subtaskFromManager);
-
-        System.out.println();
-    }
 }
