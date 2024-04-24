@@ -2,17 +2,18 @@ package service;
 
 import model.Task;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    public final int DEFAULT_MAX_SIZE = 10;
+    public final static int DEFAULT_MAX_SIZE = 10;
     private final LinkedList<Task> tasks = new LinkedList<>();
     private final int maxSize;
 
 
     public InMemoryHistoryManager() {
-        this.maxSize = DEFAULT_MAX_SIZE;
+        this(DEFAULT_MAX_SIZE);
     }
 
     public InMemoryHistoryManager(int maxSize) {
@@ -34,7 +35,7 @@ public class InMemoryHistoryManager implements HistoryManager {
      * упорядочены по дате просмотра от самого старого до самого нового.
      */
     @Override
-    public void addAll(List<? extends Task> tasks) {
+    public void addAll(Collection<? extends Task> tasks) {
         // Чтобы не выполнять лишние операции добавления при размере массива больше максимального размера истории
         // будем добавлять сразу ровно столько, сколько будет сохранено в истории
         int i = tasks.size() - maxSize;
@@ -42,13 +43,14 @@ public class InMemoryHistoryManager implements HistoryManager {
             i = 0;
         }
 
-        for (; i < tasks.size(); i++) {
-            add(tasks.get(i));
+        List<? extends Task> taskList = tasks.stream().toList();
+        for (; i < taskList.size(); i++) {
+            add(taskList.get(i));
         }
     }
 
     @Override
-    public List<Task> getAll() {
+    public Collection<Task> getAll() {
         return tasks;
     }
 }

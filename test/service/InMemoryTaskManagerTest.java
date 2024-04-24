@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -85,7 +86,7 @@ class InMemoryTaskManagerTest {
         taskManager.createSubtask(new Subtask("2", "", Status.NEW, epic2));
 
         taskManager.removeAllSubtasks();
-        List<Epic> epics = taskManager.getAllEpics();
+        Collection<Epic> epics = taskManager.getAllEpics();
 
         for (Epic epic : epics) {
             assertEquals(0, epic.getSubtasks().size(),
@@ -104,7 +105,7 @@ class InMemoryTaskManagerTest {
         taskManager.getEpic(2);
         taskManager.getSubtask(3);
 
-        List<Task> historyList = taskManager.getHistory();
+        List<Task> historyList = taskManager.getHistory().stream().toList();
 
         assertEquals(task, historyList.get(0),"Task при получении по id не был добавлен в историю");
         assertEquals(epic, historyList.get(1),"Epic при получении по id не был добавлен в историю");

@@ -1,12 +1,12 @@
 package model;
 
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class Epic extends Task {
 
-    private final Set<Subtask> subtasks = new HashSet<>();
+    private final Collection<Subtask> subtasks = new HashSet<>();
 
     public Epic(String name, String description) {
         super(name, description, Status.NEW);
@@ -28,8 +28,8 @@ public class Epic extends Task {
         subtasks.clear();
     }
 
-    public List<Subtask> getSubtasks() {
-        return subtasks.stream().toList();
+    public Collection<Subtask> getSubtasks() {
+        return subtasks;
     }
 
     @Override

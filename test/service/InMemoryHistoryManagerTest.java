@@ -6,7 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -24,9 +24,9 @@ class InMemoryHistoryManagerTest {
             historyManager.add(task);
         }
 
-        List<Task> history = historyManager.getAll();
+        Collection<Task> history = historyManager.getAll();
 
-        assertEquals(historyManager.DEFAULT_MAX_SIZE, history.size(),
+        assertEquals(InMemoryHistoryManager.DEFAULT_MAX_SIZE, history.size(),
                 "–азмер списка стал больше максимального");
 
         for (Task task : history) {
@@ -47,9 +47,9 @@ class InMemoryHistoryManagerTest {
         }
 
         historyManager.addAll(tasks);
-        List<Task> history = historyManager.getAll();
+        Collection<Task> history = historyManager.getAll();
 
-        assertEquals(historyManager.DEFAULT_MAX_SIZE, history.size(),
+        assertEquals(InMemoryHistoryManager.DEFAULT_MAX_SIZE, history.size(),
                 "–азмер списка стал больше максимального");
 
         int id = 11;

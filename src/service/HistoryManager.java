@@ -2,10 +2,10 @@ package service;
 
 import model.Task;
 
-import java.util.List;
+import java.util.Collection;
 
 public interface HistoryManager {
     void add(Task task);
-    void addAll(List<? extends Task> tasks);
-    List<Task> getAll();
+    void addAll(Collection<? extends Task> tasks);
+    Collection<Task> getAll();
 }

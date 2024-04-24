@@ -13,9 +13,9 @@ public class Main {
 
         createTest(manager);
 
-        List<Task> tasks = manager.getAllTasks();
-        List<Epic> epics = manager.getAllEpics();
-        List<Subtask> subtasks = manager.getAllSubtasks();
+        List<Task> tasks = manager.getAllTasks().stream().toList();
+        List<Epic> epics = manager.getAllEpics().stream().toList();
+        List<Subtask> subtasks = manager.getAllSubtasks().stream().toList();
 
         Task task = tasks.get((int)(Math.random() * tasks.size()));
         Epic epic = epics.get((int)(Math.random() * epics.size()));

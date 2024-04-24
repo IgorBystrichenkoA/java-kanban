@@ -4,15 +4,15 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
     private final HistoryManager historyManager;
-    private final HashMap<Integer, Task> tasks;
-    private final HashMap<Integer, Epic> epics;
-    private final HashMap<Integer, Subtask> subtasks;
+    private final Map<Integer, Task> tasks;
+    private final Map<Integer, Epic> epics;
+    private final Map<Integer, Subtask> subtasks;
 
     private int seq = 0;
 
@@ -25,18 +25,18 @@ public class InMemoryTaskManager implements TaskManager {
 //    Методы для каждого из типа задач(Задача/Эпик/Подзадача):
 //    a. Получение списка всех задач.
     @Override
-    public List<Task> getAllTasks() {
-        return this.tasks.values().stream().toList();
+    public Collection<Task> getAllTasks() {
+        return this.tasks.values();
     }
 
     @Override
-    public List<Epic> getAllEpics() {
-        return this.epics.values().stream().toList();
+    public Collection<Epic> getAllEpics() {
+        return this.epics.values();
     }
 
     @Override
-    public List<Subtask> getAllSubtasks() {
-        return this.subtasks.values().stream().toList();
+    public Collection<Subtask> getAllSubtasks() {
+        return this.subtasks.values();
     }
 
 //    b. Удаление всех задач.
@@ -171,7 +171,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteEpic(int id) {
-        List<Subtask> epicSubtasks = getEpicSubtasks(id);
+        Collection<Subtask> epicSubtasks = getEpicSubtasks(id);
         for (Subtask subtask : epicSubtasks) {
             subtasks.remove(subtask.getId());
         }
@@ -190,14 +190,14 @@ public class InMemoryTaskManager implements TaskManager {
 //    Дополнительные методы:
 //    a. Получение списка всех подзадач определённого эпика.
     @Override
-    public List<Subtask> getEpicSubtasks(int epicId) {
-        List<Subtask> subtasks = epics.get(epicId).getSubtasks();
+    public Collection<Subtask> getEpicSubtasks(int epicId) {
+        Collection<Subtask> subtasks = epics.get(epicId).getSubtasks();
         historyManager.addAll(subtasks);
         return subtasks;
     }
 
     @Override
-    public List<Task> getHistory() {
+    public Collection<Task> getHistory() {
         return historyManager.getAll();
     }
 }
