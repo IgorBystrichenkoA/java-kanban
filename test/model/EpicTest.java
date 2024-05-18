@@ -37,8 +37,8 @@ class EpicTest {
     @Test
     @DisplayName("Если подзадачи имеют одинаковый статус, он должен устанавливаться и у эпика")
     public void shouldCorrectUpdateStatusWhenAllSubtaskStatusesSame() {
-        Subtask subtask1 = new Subtask("Test Subtask", "", Status.IN_PROGRESS, epic);
-        Subtask subtask2 = new Subtask("Test Subtask", "", Status.IN_PROGRESS, epic);
+        Subtask subtask1 = new Subtask(1, "Test Subtask", "", Status.IN_PROGRESS, epic);
+        Subtask subtask2 = new Subtask(2, "Test Subtask", "", Status.IN_PROGRESS, epic);
         epic.addSubtask(subtask1);
         epic.addSubtask(subtask2);
         epic.updateStatus();
@@ -61,8 +61,8 @@ class EpicTest {
     @Test
     @DisplayName("Если подзадачи имеют не одинаковый статус, то статус эпика должен стать IN_PROGRESS")
     public void shouldSetStatusInProgressWhenSubtaskStatusesDifferent() {
-        Subtask subtask1 = new Subtask("Test Subtask", "", Status.NEW, epic);
-        Subtask subtask2 = new Subtask("Test Subtask", "", Status.DONE, epic);
+        Subtask subtask1 = new Subtask(1 ,"Test Subtask", "", Status.NEW, epic);
+        Subtask subtask2 = new Subtask(2, "Test Subtask", "", Status.DONE, epic);
         epic.addSubtask(subtask1);
         epic.addSubtask(subtask2);
         epic.updateStatus();
