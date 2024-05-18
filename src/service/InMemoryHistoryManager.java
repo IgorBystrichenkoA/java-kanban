@@ -13,6 +13,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     private Node first;
     private Node last;
     private final Map<Integer, Node> history = new HashMap<>();
+
     private static class Node {
         Task item;
         Node next;
@@ -65,8 +66,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         last = newNode;
         if (l == null) {
             first = newNode;
-        }
-        else {
+        } else {
             l.next = newNode;
         }
 
