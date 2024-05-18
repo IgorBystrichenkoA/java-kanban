@@ -9,53 +9,68 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-@DisplayName("Менеджер историй")
+@DisplayName("РњРµРЅРµРґР¶РµСЂ РёСЃС‚РѕСЂРёР№")
 class InMemoryHistoryManagerTest {
 
     @Test
-    @DisplayName("Если размер списка исчерпан, из него нужно удалить самый старый элемент")
-    void shouldDeleteOldItemWhenAddIfSizeMoreThen10() {
+    @DisplayName("РџСЂРё РґРѕР±Р°РІР»РµРЅРёРё Р·Р°РґР°С‡Рё, РѕРЅР° РґРѕР»Р¶РЅР° РґРѕР±Р°РІР»СЏС‚СЊСЃСЏ РІ РєРѕРЅРµС†")
+    void shouldAddTaskInEnd() {
         InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
 
-        for (int id = 1; id <= 11; id++) {
-            Task task = new Task(id, "Task " + id, "Description", Status.NEW);
-            historyManager.add(task);
+        for (int id = 1; id <= 3; id++) {
+            historyManager.add(new Task(id, "Task " + id, "Description", Status.NEW));
         }
 
         Collection<Task> history = historyManager.getAll();
-
-        assertEquals(InMemoryHistoryManager.DEFAULT_MAX_SIZE, history.size(),
-                "Размер списка стал больше максимального");
-
+        int id = 1;
         for (Task task : history) {
-            assertNotEquals(1, task.getId(),
-                    "После того, как размер списка исчерпан, из него был удален не самый старый элемент");
+            assertEquals(id++, task.getId(),"РќРµРїСЂР°РІРёР»СЊРЅРѕ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РґРѕР±Р°РІР»РµРЅРёРµ Р·Р°РґР°С‡Рё: РїРѕСЂСЏРґРѕРє Р·Р°РґР°С‡ " +
+                    "РїРѕСЃР»Рµ РґРѕР±Р°РІР»РµРЅРёСЏ РёС… РЅРµ СЃРѕС…СЂР°РЅРёР»СЃСЏ");
         }
     }
 
     @Test
-    @DisplayName("При добавлении списка задач, количество которых больше максимального размера истории, должны " +
-            "остаться только последние элементы из списка в количестве равном максимальному размеру истории")
-    void shouldAddLastTasksInAddAll() {
+    @DisplayName("РџСЂРё РґРѕР±Р°РІР»РµРЅРёРё СЃРїРёСЃРєР° Р·Р°РґР°С‡ РЅРё РґРѕР»Р¶РЅС‹ СЃРѕС…СЂР°РЅРёС‚СЊСЃСЏ РІ С‚РѕРј Р¶Рµ РїРѕСЂСЏРґРєРµ, С‡С‚Рѕ Рё РІ РїРµСЂРµРґР°РІР°РµРјРѕРј СЃРїРёСЃРєРµ ")
+    void shouldAddTasksInAddAllCorrect() {
         InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
 
-        ArrayList<Task> tasks = new ArrayList<>(21);
-        for (int id = 1; id <= 20; id++) {
+        ArrayList<Task> tasks = new ArrayList<>(4);
+        for (int id = 1; id <= 3; id++) {
             tasks.add(new Task(id, "Task " + id, "Description", Status.NEW));
         }
 
         historyManager.addAll(tasks);
         Collection<Task> history = historyManager.getAll();
 
-        assertEquals(InMemoryHistoryManager.DEFAULT_MAX_SIZE, history.size(),
-                "Размер списка стал больше максимального");
-
-        int id = 11;
+        int id = 1;
         for (Task task : history) {
-            assertEquals(id++, task.getId(),"Неправильно реализовано добавление последних задач " +
-                    "из списка, передаваетого в addAll");
+            assertEquals(id++, task.getId(),"РќРµРїСЂР°РІРёР»СЊРЅРѕ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РґРѕР±Р°РІР»РµРЅРёРµ Р·Р°РґР°С‡ " +
+                    "РёР· СЃРїРёСЃРєР°, РїРµСЂРµРґР°РІР°РµС‚РѕРіРѕ РІ addAll");
+        }
+    }
+
+    @Test
+    @DisplayName("РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё СѓРґР°Р»РµРЅРёСЏ Р·Р°РґР°С‡Рё РїРѕ id")
+    void shouldRemoveCorrect() {
+        InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
+
+        int testSize = 5;
+        for (int id = 1; id <= testSize; id++) {
+            historyManager.add(new Task(id, "Task " + id, "Description", Status.NEW));
+        }
+        historyManager.remove(1);
+        historyManager.remove(4);
+
+        Collection<Task> history = historyManager.getAll();
+        assertEquals(testSize - 2, history.size(), "РќРµРєРѕСЂСЂРµРєС‚РЅРѕРµ СѓРґР°Р»РµРЅРёРµ Р·Р°РґР°С‡Рё РёР· РЅР°С‡Р°Р»Р° СЃРїРёСЃРєР°");
+
+        int id = 2;
+        for (Task task : history) {
+            if (id == 4) {
+                id++;
+            }
+            assertEquals(id++, task.getId(),"РќРµРїСЂР°РІРёР»СЊРЅРѕ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РґР°Р»РµРЅРёРµ Р·Р°РґР°С‡ РїРѕ id");
         }
     }
 }
