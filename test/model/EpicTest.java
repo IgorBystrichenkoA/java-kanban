@@ -9,7 +9,7 @@ import service.TaskManager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("Эпик")
+@DisplayName("Р­РїРёРє")
 class EpicTest {
     TaskManager taskManager;
     Epic epic;
@@ -22,7 +22,7 @@ class EpicTest {
     }
 
     @Test
-    @DisplayName("При обновлении эпика если список подзадач пуст, статус должен установиться на NEW")
+    @DisplayName("РџСЂРё РѕР±РЅРѕРІР»РµРЅРёРё СЌРїРёРєР° РµСЃР»Рё СЃРїРёСЃРѕРє РїРѕРґР·Р°РґР°С‡ РїСѓСЃС‚, СЃС‚Р°С‚СѓСЃ РґРѕР»Р¶РµРЅ СѓСЃС‚Р°РЅРѕРІРёС‚СЊСЃСЏ РЅР° NEW")
     public void shouldSetStatusNewWhenUpdateAndZeroSubtasks() {
         Subtask subtask1 = new Subtask("Test Subtask", "", Status.IN_PROGRESS, epic);
         epic.addSubtask(subtask1);
@@ -30,43 +30,43 @@ class EpicTest {
 
         epic.deleteAllSubtasks();
         epic.updateStatus();
-        assertEquals(Status.NEW, epic.getStatus(),"При пустом списке подзадач и обновлении эпика статус не " +
-                "устанавливается на NEW");
+        assertEquals(Status.NEW, epic.getStatus(),"РџСЂРё РїСѓСЃС‚РѕРј СЃРїРёСЃРєРµ РїРѕРґР·Р°РґР°С‡ Рё РѕР±РЅРѕРІР»РµРЅРёРё СЌРїРёРєР° СЃС‚Р°С‚СѓСЃ РЅРµ " +
+                "СѓСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ РЅР° NEW");
     }
 
     @Test
-    @DisplayName("Если подзадачи имеют одинаковый статус, он должен устанавливаться и у эпика")
+    @DisplayName("Р•СЃР»Рё РїРѕРґР·Р°РґР°С‡Рё РёРјРµСЋС‚ РѕРґРёРЅР°РєРѕРІС‹Р№ СЃС‚Р°С‚СѓСЃ, РѕРЅ РґРѕР»Р¶РµРЅ СѓСЃС‚Р°РЅР°РІР»РёРІР°С‚СЊСЃСЏ Рё Сѓ СЌРїРёРєР°")
     public void shouldCorrectUpdateStatusWhenAllSubtaskStatusesSame() {
         Subtask subtask1 = new Subtask("Test Subtask", "", Status.IN_PROGRESS, epic);
         Subtask subtask2 = new Subtask("Test Subtask", "", Status.IN_PROGRESS, epic);
         epic.addSubtask(subtask1);
         epic.addSubtask(subtask2);
         epic.updateStatus();
-        assertEquals(Status.IN_PROGRESS, epic.getStatus(),"Если все подзадачи имеют статус IN_PROGRESS, " +
-                "то и эпик должен иметь статус IN_PROGRESS");
+        assertEquals(Status.IN_PROGRESS, epic.getStatus(),"Р•СЃР»Рё РІСЃРµ РїРѕРґР·Р°РґР°С‡Рё РёРјРµСЋС‚ СЃС‚Р°С‚СѓСЃ IN_PROGRESS, " +
+                "С‚Рѕ Рё СЌРїРёРє РґРѕР»Р¶РµРЅ РёРјРµС‚СЊ СЃС‚Р°С‚СѓСЃ IN_PROGRESS");
 
         subtask1.setStatus(Status.DONE);
         subtask2.setStatus(Status.DONE);
         epic.updateStatus();
-        assertEquals(Status.DONE, epic.getStatus(),"Если все подзадачи имеют статус DONE, " +
-                "то и эпик должен иметь статус DONE");
+        assertEquals(Status.DONE, epic.getStatus(),"Р•СЃР»Рё РІСЃРµ РїРѕРґР·Р°РґР°С‡Рё РёРјРµСЋС‚ СЃС‚Р°С‚СѓСЃ DONE, " +
+                "С‚Рѕ Рё СЌРїРёРє РґРѕР»Р¶РµРЅ РёРјРµС‚СЊ СЃС‚Р°С‚СѓСЃ DONE");
 
         subtask1.setStatus(Status.NEW);
         subtask2.setStatus(Status.NEW);
         epic.updateStatus();
-        assertEquals(Status.NEW, epic.getStatus(),"Если все подзадачи имеют статус NEW, " +
-                "то и эпик должен иметь статус NEW");
+        assertEquals(Status.NEW, epic.getStatus(),"Р•СЃР»Рё РІСЃРµ РїРѕРґР·Р°РґР°С‡Рё РёРјРµСЋС‚ СЃС‚Р°С‚СѓСЃ NEW, " +
+                "С‚Рѕ Рё СЌРїРёРє РґРѕР»Р¶РµРЅ РёРјРµС‚СЊ СЃС‚Р°С‚СѓСЃ NEW");
     }
 
     @Test
-    @DisplayName("Если подзадачи имеют не одинаковый статус, то статус эпика должен стать IN_PROGRESS")
+    @DisplayName("Р•СЃР»Рё РїРѕРґР·Р°РґР°С‡Рё РёРјРµСЋС‚ РЅРµ РѕРґРёРЅР°РєРѕРІС‹Р№ СЃС‚Р°С‚СѓСЃ, С‚Рѕ СЃС‚Р°С‚СѓСЃ СЌРїРёРєР° РґРѕР»Р¶РµРЅ СЃС‚Р°С‚СЊ IN_PROGRESS")
     public void shouldSetStatusInProgressWhenSubtaskStatusesDifferent() {
         Subtask subtask1 = new Subtask("Test Subtask", "", Status.NEW, epic);
         Subtask subtask2 = new Subtask("Test Subtask", "", Status.DONE, epic);
         epic.addSubtask(subtask1);
         epic.addSubtask(subtask2);
         epic.updateStatus();
-        assertEquals(Status.IN_PROGRESS, epic.getStatus(),"Статус эпика не установился в IN_PROGRESS при " +
-                "разных статусах подзадач");
+        assertEquals(Status.IN_PROGRESS, epic.getStatus(),"РЎС‚Р°С‚СѓСЃ СЌРїРёРєР° РЅРµ СѓСЃС‚Р°РЅРѕРІРёР»СЃСЏ РІ IN_PROGRESS РїСЂРё " +
+                "СЂР°Р·РЅС‹С… СЃС‚Р°С‚СѓСЃР°С… РїРѕРґР·Р°РґР°С‡");
     }
 }

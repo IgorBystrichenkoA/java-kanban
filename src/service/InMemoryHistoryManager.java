@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    // Можно было использовать LinkedHashMap, но в задании требовалось самому реализовать его
+    // РњРѕР¶РЅРѕ Р±С‹Р»Рѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ LinkedHashMap, РЅРѕ РІ Р·Р°РґР°РЅРёРё С‚СЂРµР±РѕРІР°Р»РѕСЃСЊ СЃР°РјРѕРјСѓ СЂРµР°Р»РёР·РѕРІР°С‚СЊ РµРіРѕ
     private Node first;
     private Node last;
     private final Map<Integer, Node> history = new HashMap<>();
@@ -74,10 +74,10 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     /**
-     * Добавляет несколько задач в историю
+     * Р”РѕР±Р°РІР»СЏРµС‚ РЅРµСЃРєРѕР»СЊРєРѕ Р·Р°РґР°С‡ РІ РёСЃС‚РѕСЂРёСЋ
      *
-     * @param tasks - список задач на добавление. Предполагается, что задачи в списке
-     * упорядочены по дате просмотра от самого старого до самого нового.
+     * @param tasks - СЃРїРёСЃРѕРє Р·Р°РґР°С‡ РЅР° РґРѕР±Р°РІР»РµРЅРёРµ. РџСЂРµРґРїРѕР»Р°РіР°РµС‚СЃСЏ, С‡С‚Рѕ Р·Р°РґР°С‡Рё РІ СЃРїРёСЃРєРµ
+     * СѓРїРѕСЂСЏРґРѕС‡РµРЅС‹ РїРѕ РґР°С‚Рµ РїСЂРѕСЃРјРѕС‚СЂР° РѕС‚ СЃР°РјРѕРіРѕ СЃС‚Р°СЂРѕРіРѕ РґРѕ СЃР°РјРѕРіРѕ РЅРѕРІРѕРіРѕ.
      */
     @Override
     public void addAll(Collection<? extends Task> tasks) {

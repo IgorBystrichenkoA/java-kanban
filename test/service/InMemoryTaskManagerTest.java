@@ -14,7 +14,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-@DisplayName("Менеджер задач")
+@DisplayName("РњРµРЅРµРґР¶РµСЂ Р·Р°РґР°С‡")
 class InMemoryTaskManagerTest {
 
     static TaskManager taskManager;
@@ -26,46 +26,46 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    @DisplayName("При создании задачи, эпика и подзадечи должен увеличиваться счетчик id")
+    @DisplayName("РџСЂРё СЃРѕР·РґР°РЅРёРё Р·Р°РґР°С‡Рё, СЌРїРёРєР° Рё РїРѕРґР·Р°РґРµС‡Рё РґРѕР»Р¶РµРЅ СѓРІРµР»РёС‡РёРІР°С‚СЊСЃСЏ СЃС‡РµС‚С‡РёРє id")
     void shouldIncreaseIdCounterWhenCreate() {
         Task task1 = taskManager.createTask(new Task("1", "", Status.NEW));
         Task task2 = taskManager.createTask(new Task("2", "", Status.NEW));
-        assertEquals(1, task2.getId() - task1.getId(), "Неправильное поведение счетчика id" +
-                "при добавлении Task");
+        assertEquals(1, task2.getId() - task1.getId(), "РќРµРїСЂР°РІРёР»СЊРЅРѕРµ РїРѕРІРµРґРµРЅРёРµ СЃС‡РµС‚С‡РёРєР° id" +
+                "РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё Task");
 
         Epic epic1 = taskManager.createEpic(new Epic("", ""));
         Epic epic2 = taskManager.createEpic(new Epic("", ""));
-        assertEquals(1, epic2.getId() - epic1.getId(), "Неправильное поведение счетчика id" +
-                "при добавлении Epic");
+        assertEquals(1, epic2.getId() - epic1.getId(), "РќРµРїСЂР°РІРёР»СЊРЅРѕРµ РїРѕРІРµРґРµРЅРёРµ СЃС‡РµС‚С‡РёРєР° id" +
+                "РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё Epic");
 
         Subtask subtask1 = taskManager.createSubtask(new Subtask("1", "", Status.NEW, epic1));
         Subtask subtask2 = taskManager.createSubtask(new Subtask("2", "", Status.NEW, epic2));
-        assertEquals(1, subtask2.getId() - subtask1.getId(), "Неправильное поведение счетчика id" +
-                "при добавлении Subtask");
+        assertEquals(1, subtask2.getId() - subtask1.getId(), "РќРµРїСЂР°РІРёР»СЊРЅРѕРµ РїРѕРІРµРґРµРЅРёРµ СЃС‡РµС‚С‡РёРєР° id" +
+                "РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё Subtask");
     }
 
     @Test
-    @DisplayName("Если подзадачу нельзя создать, счетсик id не должен быть увеличен")
+    @DisplayName("Р•СЃР»Рё РїРѕРґР·Р°РґР°С‡Сѓ РЅРµР»СЊР·СЏ СЃРѕР·РґР°С‚СЊ, СЃС‡РµС‚СЃРёРє id РЅРµ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СѓРІРµР»РёС‡РµРЅ")
     void shouldReturnNullWhenSubtaskNotCreate() {
         Subtask subtask = taskManager.createSubtask(new Subtask("1", "", Status.NEW,
                 new Epic("", "")));
 
-        assertNull(subtask, "При невозможности создать подзадачу функция должна возвращать null");
+        assertNull(subtask, "РџСЂРё РЅРµРІРѕР·РјРѕР¶РЅРѕСЃС‚Рё СЃРѕР·РґР°С‚СЊ РїРѕРґР·Р°РґР°С‡Сѓ С„СѓРЅРєС†РёСЏ РґРѕР»Р¶РЅР° РІРѕР·РІСЂР°С‰Р°С‚СЊ null");
     }
 
     @Test
-    @DisplayName("Если подзадачу нельзя создать, счетсик id не должен быть увеличен")
+    @DisplayName("Р•СЃР»Рё РїРѕРґР·Р°РґР°С‡Сѓ РЅРµР»СЊР·СЏ СЃРѕР·РґР°С‚СЊ, СЃС‡РµС‚СЃРёРє id РЅРµ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СѓРІРµР»РёС‡РµРЅ")
     void shouldNotIncreaseIdCounterWhenSubtaskNotCreate() {
         Subtask subtask = taskManager.createSubtask(new Subtask("1", "", Status.NEW,
                 new Epic("", "")));
         Task task = taskManager.createTask(new Task("1", "", Status.NEW));
         int id = task.getId();
 
-        assertEquals(1, id, "При отмене создания подзадачи счетчик был изменен");
+        assertEquals(1, id, "РџСЂРё РѕС‚РјРµРЅРµ СЃРѕР·РґР°РЅРёСЏ РїРѕРґР·Р°РґР°С‡Рё СЃС‡РµС‚С‡РёРє Р±С‹Р» РёР·РјРµРЅРµРЅ");
     }
 
     @Test
-    @DisplayName("При удалении всех эпиков должны удаляться и все подзадачи")
+    @DisplayName("РџСЂРё СѓРґР°Р»РµРЅРёРё РІСЃРµС… СЌРїРёРєРѕРІ РґРѕР»Р¶РЅС‹ СѓРґР°Р»СЏС‚СЊСЃСЏ Рё РІСЃРµ РїРѕРґР·Р°РґР°С‡Рё")
     void shouldRemoveAllSubtasksWhenRemoveAllEpics() {
         Epic epic1 = taskManager.createEpic(new Epic("", ""));
         Epic epic2 = taskManager.createEpic(new Epic("", ""));
@@ -74,11 +74,11 @@ class InMemoryTaskManagerTest {
         taskManager.removeAllEpics();
 
         assertEquals(0, taskManager.getAllSubtasks().size(),
-                "При удалении эпиков не были удалены подзадачи");
+                "РџСЂРё СѓРґР°Р»РµРЅРёРё СЌРїРёРєРѕРІ РЅРµ Р±С‹Р»Рё СѓРґР°Р»РµРЅС‹ РїРѕРґР·Р°РґР°С‡Рё");
     }
 
     @Test
-    @DisplayName("При удалении всех подзадач они должны удаляться и у всех эпиков, при этом эпики должны быть обновлены")
+    @DisplayName("РџСЂРё СѓРґР°Р»РµРЅРёРё РІСЃРµС… РїРѕРґР·Р°РґР°С‡ РѕРЅРё РґРѕР»Р¶РЅС‹ СѓРґР°Р»СЏС‚СЊСЃСЏ Рё Сѓ РІСЃРµС… СЌРїРёРєРѕРІ, РїСЂРё СЌС‚РѕРј СЌРїРёРєРё РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ РѕР±РЅРѕРІР»РµРЅС‹")
     void shouldUpdateEpicsWhenRemoveAllSubtasks() {
         Epic epic1 = taskManager.createEpic(new Epic("", ""));
         Epic epic2 = taskManager.createEpic(new Epic("", ""));
@@ -90,12 +90,12 @@ class InMemoryTaskManagerTest {
 
         for (Epic epic : epics) {
             assertEquals(0, epic.getSubtasks().size(),
-                    "После удаления подзадач, они удалились не у всех эпиков");
+                    "РџРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ РїРѕРґР·Р°РґР°С‡, РѕРЅРё СѓРґР°Р»РёР»РёСЃСЊ РЅРµ Сѓ РІСЃРµС… СЌРїРёРєРѕРІ");
         }
     }
 
     @Test
-    @DisplayName("При получении задач, эпиков или подзадач по id они должны добавляться в историю")
+    @DisplayName("РџСЂРё РїРѕР»СѓС‡РµРЅРёРё Р·Р°РґР°С‡, СЌРїРёРєРѕРІ РёР»Рё РїРѕРґР·Р°РґР°С‡ РїРѕ id РѕРЅРё РґРѕР»Р¶РЅС‹ РґРѕР±Р°РІР»СЏС‚СЊСЃСЏ РІ РёСЃС‚РѕСЂРёСЋ")
     void shouldAddTasksInHistoryWhenGetById() {
         Task task = taskManager.createTask(new Task(1, "1", "", Status.NEW));
         Epic epic = taskManager.createEpic(new Epic(2, "", ""));
@@ -107,9 +107,9 @@ class InMemoryTaskManagerTest {
 
         List<Task> historyList = taskManager.getHistory().stream().toList();
 
-        assertEquals(task, historyList.get(0),"Task при получении по id не был добавлен в историю");
-        assertEquals(epic, historyList.get(1),"Epic при получении по id не был добавлен в историю");
-        assertEquals(subtask, historyList.get(2),"Subtask при получении по id не был добавлен в историю");
+        assertEquals(task, historyList.get(0),"Task РїСЂРё РїРѕР»СѓС‡РµРЅРёРё РїРѕ id РЅРµ Р±С‹Р» РґРѕР±Р°РІР»РµРЅ РІ РёСЃС‚РѕСЂРёСЋ");
+        assertEquals(epic, historyList.get(1),"Epic РїСЂРё РїРѕР»СѓС‡РµРЅРёРё РїРѕ id РЅРµ Р±С‹Р» РґРѕР±Р°РІР»РµРЅ РІ РёСЃС‚РѕСЂРёСЋ");
+        assertEquals(subtask, historyList.get(2),"Subtask РїСЂРё РїРѕР»СѓС‡РµРЅРёРё РїРѕ id РЅРµ Р±С‹Р» РґРѕР±Р°РІР»РµРЅ РІ РёСЃС‚РѕСЂРёСЋ");
     }
 
 }

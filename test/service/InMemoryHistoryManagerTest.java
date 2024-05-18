@@ -10,11 +10,11 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("Менеджер историй")
+@DisplayName("РњРµРЅРµРґР¶РµСЂ РёСЃС‚РѕСЂРёР№")
 class InMemoryHistoryManagerTest {
 
     @Test
-    @DisplayName("При добавлении задачи, она должна добавляться в конец")
+    @DisplayName("РџСЂРё РґРѕР±Р°РІР»РµРЅРёРё Р·Р°РґР°С‡Рё, РѕРЅР° РґРѕР»Р¶РЅР° РґРѕР±Р°РІР»СЏС‚СЊСЃСЏ РІ РєРѕРЅРµС†")
     void shouldAddTaskInEnd() {
         InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
 
@@ -25,13 +25,13 @@ class InMemoryHistoryManagerTest {
         Collection<Task> history = historyManager.getAll();
         int id = 1;
         for (Task task : history) {
-            assertEquals(id++, task.getId(),"Неправильно реализовано добавление задачи: порядок задач " +
-                    "после добавления их не сохранился");
+            assertEquals(id++, task.getId(),"РќРµРїСЂР°РІРёР»СЊРЅРѕ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РґРѕР±Р°РІР»РµРЅРёРµ Р·Р°РґР°С‡Рё: РїРѕСЂСЏРґРѕРє Р·Р°РґР°С‡ " +
+                    "РїРѕСЃР»Рµ РґРѕР±Р°РІР»РµРЅРёСЏ РёС… РЅРµ СЃРѕС…СЂР°РЅРёР»СЃСЏ");
         }
     }
 
     @Test
-    @DisplayName("При добавлении списка задач ни должны сохраниться в том же порядке, что и в передаваемом списке ")
+    @DisplayName("РџСЂРё РґРѕР±Р°РІР»РµРЅРёРё СЃРїРёСЃРєР° Р·Р°РґР°С‡ РЅРё РґРѕР»Р¶РЅС‹ СЃРѕС…СЂР°РЅРёС‚СЊСЃСЏ РІ С‚РѕРј Р¶Рµ РїРѕСЂСЏРґРєРµ, С‡С‚Рѕ Рё РІ РїРµСЂРµРґР°РІР°РµРјРѕРј СЃРїРёСЃРєРµ ")
     void shouldAddTasksInAddAllCorrect() {
         InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
 
@@ -45,13 +45,13 @@ class InMemoryHistoryManagerTest {
 
         int id = 1;
         for (Task task : history) {
-            assertEquals(id++, task.getId(),"Неправильно реализовано добавление задач " +
-                    "из списка, передаваетого в addAll");
+            assertEquals(id++, task.getId(),"РќРµРїСЂР°РІРёР»СЊРЅРѕ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РґРѕР±Р°РІР»РµРЅРёРµ Р·Р°РґР°С‡ " +
+                    "РёР· СЃРїРёСЃРєР°, РїРµСЂРµРґР°РІР°РµС‚РѕРіРѕ РІ addAll");
         }
     }
 
     @Test
-    @DisplayName("Проверка корректности удаления задачи по id")
+    @DisplayName("РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё СѓРґР°Р»РµРЅРёСЏ Р·Р°РґР°С‡Рё РїРѕ id")
     void shouldRemoveCorrect() {
         InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
 
@@ -63,14 +63,14 @@ class InMemoryHistoryManagerTest {
         historyManager.remove(4);
 
         Collection<Task> history = historyManager.getAll();
-        assertEquals(testSize - 2, history.size(), "Некорректное удаление задачи из начала списка");
+        assertEquals(testSize - 2, history.size(), "РќРµРєРѕСЂСЂРµРєС‚РЅРѕРµ СѓРґР°Р»РµРЅРёРµ Р·Р°РґР°С‡Рё РёР· РЅР°С‡Р°Р»Р° СЃРїРёСЃРєР°");
 
         int id = 2;
         for (Task task : history) {
             if (id == 4) {
                 id++;
             }
-            assertEquals(id++, task.getId(),"Неправильно реализовано даление задач по id");
+            assertEquals(id++, task.getId(),"РќРµРїСЂР°РІРёР»СЊРЅРѕ СЂРµР°Р»РёР·РѕРІР°РЅРѕ РґР°Р»РµРЅРёРµ Р·Р°РґР°С‡ РїРѕ id");
         }
     }
 }
