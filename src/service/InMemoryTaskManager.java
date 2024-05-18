@@ -23,8 +23,8 @@ public class InMemoryTaskManager implements TaskManager {
         this.subtasks = new HashMap<>();
     }
 
-//    РњРµС‚РѕРґС‹ РґР»СЏ РєР°Р¶РґРѕРіРѕ РёР· С‚РёРїР° Р·Р°РґР°С‡(Р—Р°РґР°С‡Р°/Р­РїРёРє/РџРѕРґР·Р°РґР°С‡Р°):
-//    a. РџРѕР»СѓС‡РµРЅРёРµ СЃРїРёСЃРєР° РІСЃРµС… Р·Р°РґР°С‡.
+//    Методы для каждого из типа задач(Задача/Эпик/Подзадача):
+//    a. Получение списка всех задач.
     @Override
     public Collection<Task> getAllTasks() {
         return this.tasks.values();
@@ -40,7 +40,7 @@ public class InMemoryTaskManager implements TaskManager {
         return this.subtasks.values();
     }
 
-//    b. РЈРґР°Р»РµРЅРёРµ РІСЃРµС… Р·Р°РґР°С‡.
+//    b. Удаление всех задач.
     @Override
     public void removeAllTasks() {
         historyManager.removeAll(tasks.values());
@@ -52,13 +52,13 @@ public class InMemoryTaskManager implements TaskManager {
         historyManager.removeAll(epics.values());
         historyManager.removeAll(subtasks.values());
         epics.clear();
-        subtasks.clear(); // РљР°Р¶РґР°СЏ РїРѕРґР·Р°РґР°С‡Р° Р·Р°РєСЂРµРїР»РµРЅР° РїРѕРґ СЌРїРёРєРѕРј
+        subtasks.clear(); // Каждая подзадача закреплена под эпиком
     }
 
     @Override
     public void removeAllSubtasks() {
         historyManager.removeAll(subtasks.values());
-        // РЎРїРµСЂРІР° СѓРґР°Р»РёРј РІСЃРµ РїРѕРґР·Р°РґР°С‡Рё РІ СЌРїРёРєР°С…
+        // Сперва удалим все подзадачи в эпиках
         for (Map.Entry<Integer, Epic> epicEntry : epics.entrySet()) {
             Epic epic = epicEntry.getValue();
             epic.deleteAllSubtasks();
@@ -67,7 +67,7 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks.clear();
     }
 
-//    c. РџРѕР»СѓС‡РµРЅРёРµ РїРѕ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂСѓ.
+//    c. Получение по идентификатору.
     @Override
     public Task getTask(Integer id) {
         Task task = tasks.get(id);
@@ -89,7 +89,7 @@ public class InMemoryTaskManager implements TaskManager {
         return subtask;
     }
 
-//    d. РЎРѕР·РґР°РЅРёРµ. РЎР°Рј РѕР±СЉРµРєС‚ РґРѕР»Р¶РµРЅ РїРµСЂРµРґР°РІР°С‚СЊСЃСЏ РІ РєР°С‡РµСЃС‚РІРµ РїР°СЂР°РјРµС‚СЂР°.
+//    d. Создание. Сам объект должен передаваться в качестве параметра.
     @Override
     public Task createTask(Task task) {
         task.setId(generateId());
@@ -107,7 +107,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Subtask createSubtask(Subtask subtask) {
         Epic epicFromManager = subtask.getEpic();
-        // Р•СЃР»Рё РїСЂРµРґР»РѕР¶РµРЅРЅРѕРіРѕ СЌРїРёРєР° РЅРµС‚ РІ С‚Р°Р±Р»РёС†Рµ, С‚Рѕ РїРѕРґР·Р°РґР°С‡Сѓ РЅРµ СЃРѕР·РґР°РµРј
+        // Если предложенного эпика нет в таблице, то подзадачу не создаем
         if (!epics.containsKey(epicFromManager.getId())) {
             return null;
         }
@@ -123,7 +123,7 @@ public class InMemoryTaskManager implements TaskManager {
         return ++seq;
     }
 
-//    e. РћР±РЅРѕРІР»РµРЅРёРµ. РќРѕРІР°СЏ РІРµСЂСЃРёСЏ РѕР±СЉРµРєС‚Р° СЃ РІРµСЂРЅС‹Рј РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂРѕРј РїРµСЂРµРґР°С‘С‚СЃСЏ РІ РІРёРґРµ РїР°СЂР°РјРµС‚СЂР°.
+//    e. Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
     @Override
     public void updateTask(Task task) {
         Task saved = tasks.get(task.getId());
@@ -167,7 +167,7 @@ public class InMemoryTaskManager implements TaskManager {
         saved.getEpic().updateStatus();
     }
 
-//    f. РЈРґР°Р»РµРЅРёРµ РїРѕ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂСѓ.
+//    f. Удаление по идентификатору.
     @Override
     public void deleteTask(int id) {
         historyManager.remove(id);
@@ -195,8 +195,8 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks.remove(id);
     }
 
-//    Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РјРµС‚РѕРґС‹:
-//    a. РџРѕР»СѓС‡РµРЅРёРµ СЃРїРёСЃРєР° РІСЃРµС… РїРѕРґР·Р°РґР°С‡ РѕРїСЂРµРґРµР»С‘РЅРЅРѕРіРѕ СЌРїРёРєР°.
+//    Дополнительные методы:
+//    a. Получение списка всех подзадач определённого эпика.
     @Override
     public Collection<Subtask> getEpicSubtasks(int epicId) {
         Collection<Subtask> subtasks = epics.get(epicId).getSubtasks();
