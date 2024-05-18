@@ -35,6 +35,7 @@ public class Main {
             System.out.println("Id: " + task.getId() + "; name: " + task.getName() + ";");
         }
     }
+
     private static void createTest(TaskManager taskManager) {
         Task task1 = taskManager.createTask(new Task("Задача 1", "Описание 1.1", Status.NEW));
         System.out.println("Create task " + task1);
@@ -63,5 +64,4 @@ public class Main {
 
         System.out.println();
     }
-
 }
