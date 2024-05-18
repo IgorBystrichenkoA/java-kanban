@@ -2,30 +2,75 @@ package service;
 
 import model.Task;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    public final static int DEFAULT_MAX_SIZE = 10;
-    private final LinkedList<Task> tasks = new LinkedList<>();
-    private final int maxSize;
 
+    // Можно было использовать LinkedHashMap, но в задании требовалось самому реализовать его
+    private Node first;
+    private Node last;
+    private final Map<Integer, Node> history = new HashMap<>();
 
-    public InMemoryHistoryManager() {
-        this(DEFAULT_MAX_SIZE);
-    }
+    private static class Node {
+        Task item;
+        Node next;
+        Node prev;
 
-    public InMemoryHistoryManager(int maxSize) {
-        this.maxSize = maxSize;
+        Node(Node prev, Task element, Node next) {
+            this.item = element;
+            this.next = next;
+            this.prev = prev;
+        }
     }
 
     @Override
     public void add(Task task) {
-        tasks.addLast(task);
-        if(tasks.size() > maxSize) {
-            tasks.removeFirst();
+        Node node = history.get(task.getId());
+        removeNode(node);
+        linkLast(task);
+    }
+
+    private void removeNode(Node node) {
+        if (node == null) {
+            return;
         }
+        final Task element = node.item;
+        final Node next = node.next;
+        final Node prev = node.prev;
+
+        if (prev == null) {
+            first = next;
+        } else {
+            prev.next = next;
+            node.prev = null;
+        }
+
+        if (next == null) {
+            last = prev;
+        } else {
+            next.prev = prev;
+            node.next = null;
+        }
+
+        history.remove(node.item.getId());
+
+        node.item = null;
+    }
+
+    private void linkLast(Task task) {
+        final Node l = last;
+        final Node newNode = new Node(l, task, null);
+        last = newNode;
+        if (l == null) {
+            first = newNode;
+        } else {
+            l.next = newNode;
+        }
+
+        history.put(task.getId(), newNode);
     }
 
     /**
@@ -36,21 +81,32 @@ public class InMemoryHistoryManager implements HistoryManager {
      */
     @Override
     public void addAll(Collection<? extends Task> tasks) {
-        // Чтобы не выполнять лишние операции добавления при размере массива больше максимального размера истории
-        // будем добавлять сразу ровно столько, сколько будет сохранено в истории
-        int i = tasks.size() - maxSize;
-        if (i < 0) {
-            i = 0;
+        for (Task task : tasks) {
+            add(task);
         }
+    }
 
-        List<? extends Task> taskList = tasks.stream().toList();
-        for (; i < taskList.size(); i++) {
-            add(taskList.get(i));
+    @Override
+    public void remove(int id) {
+        Node node = history.remove(id);
+        removeNode(node);
+    }
+
+    @Override
+    public void removeAll(Collection<? extends Task> tasks) {
+        for (Task task : tasks) {
+            remove(task.getId());
         }
     }
 
     @Override
     public Collection<Task> getAll() {
+        Collection<Task> tasks = new ArrayList<>();
+        Node current = first;
+        while (current != null) {
+            tasks.add(current.item);
+            current = current.next;
+        }
         return tasks;
     }
 }
