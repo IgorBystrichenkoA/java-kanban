@@ -9,53 +9,68 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @DisplayName("ћенеджер историй")
 class InMemoryHistoryManagerTest {
 
     @Test
-    @DisplayName("≈сли размер списка исчерпан, из него нужно удалить самый старый элемент")
-    void shouldDeleteOldItemWhenAddIfSizeMoreThen10() {
+    @DisplayName("ѕри добавлении задачи, она должна добавл€тьс€ в конец")
+    void shouldAddTaskInEnd() {
         InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
 
-        for (int id = 1; id <= 11; id++) {
-            Task task = new Task(id, "Task " + id, "Description", Status.NEW);
-            historyManager.add(task);
+        for (int id = 1; id <= 3; id++) {
+            historyManager.add(new Task(id, "Task " + id, "Description", Status.NEW));
         }
 
         Collection<Task> history = historyManager.getAll();
-
-        assertEquals(InMemoryHistoryManager.DEFAULT_MAX_SIZE, history.size(),
-                "–азмер списка стал больше максимального");
-
+        int id = 1;
         for (Task task : history) {
-            assertNotEquals(1, task.getId(),
-                    "ѕосле того, как размер списка исчерпан, из него был удален не самый старый элемент");
+            assertEquals(id++, task.getId(),"Ќеправильно реализовано добавление задачи: пор€док задач " +
+                    "после добавлени€ их не сохранилс€");
         }
     }
 
     @Test
-    @DisplayName("ѕри добавлении списка задач, количество которых больше максимального размера истории, должны " +
-            "остатьс€ только последние элементы из списка в количестве равном максимальному размеру истории")
-    void shouldAddLastTasksInAddAll() {
+    @DisplayName("ѕри добавлении списка задач ни должны сохранитьс€ в том же пор€дке, что и в передаваемом списке ")
+    void shouldAddTasksInAddAllCorrect() {
         InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
 
-        ArrayList<Task> tasks = new ArrayList<>(21);
-        for (int id = 1; id <= 20; id++) {
+        ArrayList<Task> tasks = new ArrayList<>(4);
+        for (int id = 1; id <= 3; id++) {
             tasks.add(new Task(id, "Task " + id, "Description", Status.NEW));
         }
 
         historyManager.addAll(tasks);
         Collection<Task> history = historyManager.getAll();
 
-        assertEquals(InMemoryHistoryManager.DEFAULT_MAX_SIZE, history.size(),
-                "–азмер списка стал больше максимального");
-
-        int id = 11;
+        int id = 1;
         for (Task task : history) {
-            assertEquals(id++, task.getId(),"Ќеправильно реализовано добавление последних задач " +
+            assertEquals(id++, task.getId(),"Ќеправильно реализовано добавление задач " +
                     "из списка, передаваетого в addAll");
+        }
+    }
+
+    @Test
+    @DisplayName("ѕроверка корректности удалени€ задачи по id")
+    void shouldRemoveCorrect() {
+        InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
+
+        int testSize = 5;
+        for (int id = 1; id <= testSize; id++) {
+            historyManager.add(new Task(id, "Task " + id, "Description", Status.NEW));
+        }
+        historyManager.remove(1);
+        historyManager.remove(4);
+
+        Collection<Task> history = historyManager.getAll();
+        assertEquals(testSize - 2, history.size(), "Ќекорректное удаление задачи из начала списка");
+
+        int id = 2;
+        for (Task task : history) {
+            if (id == 4) {
+                id++;
+            }
+            assertEquals(id++, task.getId(),"Ќеправильно реализовано даление задач по id");
         }
     }
 }
