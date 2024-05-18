@@ -22,6 +22,7 @@ public class InMemoryTaskManager implements TaskManager {
         this.epics = new HashMap<>();
         this.subtasks = new HashMap<>();
     }
+
 //    Методы для каждого из типа задач(Задача/Эпик/Подзадача):
 //    a. Получение списка всех задач.
     @Override
@@ -42,19 +43,23 @@ public class InMemoryTaskManager implements TaskManager {
 //    b. Удаление всех задач.
     @Override
     public void removeAllTasks() {
+        historyManager.removeAll(tasks.values());
         tasks.clear();
     }
 
     @Override
     public void removeAllEpics() {
+        historyManager.removeAll(epics.values());
+        historyManager.removeAll(subtasks.values());
         epics.clear();
         subtasks.clear(); // Каждая подзадача закреплена под эпиком
     }
 
     @Override
     public void removeAllSubtasks() {
+        historyManager.removeAll(subtasks.values());
         // Сперва удалим все подзадачи в эпиках
-        for(Map.Entry<Integer, Epic> epicEntry : epics.entrySet()) {
+        for (Map.Entry<Integer, Epic> epicEntry : epics.entrySet()) {
             Epic epic = epicEntry.getValue();
             epic.deleteAllSubtasks();
             epic.updateStatus();
@@ -160,19 +165,21 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         saved.getEpic().updateStatus();
-
     }
 
 //    f. Удаление по идентификатору.
     @Override
     public void deleteTask(int id) {
+        historyManager.remove(id);
         tasks.remove(id);
     }
 
     @Override
     public void deleteEpic(int id) {
+        historyManager.remove(id);
         Collection<Subtask> epicSubtasks = getEpicSubtasks(id);
         for (Subtask subtask : epicSubtasks) {
+            historyManager.remove(subtask.getId());
             subtasks.remove(subtask.getId());
         }
         epics.remove(id);
@@ -180,6 +187,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteSubtask(int id) {
+        historyManager.remove(id);
         Subtask deleted = subtasks.get(id);
         Epic epic = deleted.getEpic();
         epic.deleteSubtask(deleted);
