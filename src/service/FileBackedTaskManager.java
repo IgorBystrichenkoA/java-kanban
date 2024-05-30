@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Scanner;
 
-public class FileBackedTaskManager extends InMemoryTaskManager{
+public class FileBackedTaskManager extends InMemoryTaskManager {
     private final Path file;
 
     public FileBackedTaskManager(HistoryManager historyManager, Path file) {
