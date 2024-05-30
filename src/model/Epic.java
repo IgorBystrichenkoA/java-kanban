@@ -12,7 +12,7 @@ public class Epic extends Task {
         super(name, description, Status.NEW);
     }
 
-    public Epic(int id, String name, String description) {
+    public Epic(Integer id, String name, String description) {
         super(id, name, description, Status.NEW);
     }
 
@@ -50,6 +50,16 @@ public class Epic extends Task {
         } else {
             status = Status.IN_PROGRESS;
         }
+    }
+
+    @Override
+    public Integer getEpicId() {
+        return null;
+    }
+
+    @Override
+    public TaskType getType() {
+        return TaskType.EPIC;
     }
 
     @Override
