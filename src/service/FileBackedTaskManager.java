@@ -61,9 +61,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager{
     }
 
     private InputStream getFileAsInputStream(final Path file) {
-        return this.getClass()
-                .getClassLoader()
-                .getResourceAsStream(file.getFileName().toString());
+        return this.getClass().getClassLoader().getResourceAsStream(file.getFileName().toString());
     }
 
     private Task fromString(String value) {
