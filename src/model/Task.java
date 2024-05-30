@@ -60,6 +60,7 @@ public class Task {
     public TaskType getType() {
         return TaskType.TASK;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(id);
