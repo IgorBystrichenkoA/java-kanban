@@ -126,7 +126,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
             writer.flush();
         } catch (IOException e) {
-            throw new RuntimeException("Œ¯Ë·Í‡ ‚ Ù‡ÈÎÂ: " + file, e);
+            throw new RuntimeException("–û—à–∏–±–∫–∞ –≤ —Ñ–∞–π–ª–µ: " + file, e);
         }
     }
 
