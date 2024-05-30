@@ -16,7 +16,7 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("Менеджер задач сохранением в файл")
+@DisplayName("РњРµРЅРµРґР¶РµСЂ Р·Р°РґР°С‡ СЃРѕС…СЂР°РЅРµРЅРёРµРј РІ С„Р°Р№Р»")
 public class FileBackedTaskManagerTest {
     static TaskManager taskManager;
     static Path file;
@@ -27,7 +27,7 @@ public class FileBackedTaskManagerTest {
         try {
             file = Files.createTempFile("test", ".csv");
         } catch (IOException e) {
-            throw new RuntimeException("Не удалось создать тестовый файл", e);
+            throw new RuntimeException("РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ С‚РµСЃС‚РѕРІС‹Р№ С„Р°Р№Р»", e);
         }
         taskManager = new FileBackedTaskManager(historyManager, file);
     }
@@ -42,7 +42,7 @@ public class FileBackedTaskManagerTest {
     }
 
     @Test
-    @DisplayName("Корректное сохранение задач")
+    @DisplayName("РљРѕСЂСЂРµРєС‚РЅРѕРµ СЃРѕС…СЂР°РЅРµРЅРёРµ Р·Р°РґР°С‡")
     void shouldSaveTasksCorrect() {
         taskManager.createTask(new Task("TaskName", "TaskDescription", Status.NEW));
         Epic epic1 = taskManager.createEpic(new Epic("EpicName", "EpicDescription"));
@@ -51,30 +51,30 @@ public class FileBackedTaskManagerTest {
         try (BufferedReader br = new BufferedReader(new FileReader(file.toFile()))) {
             String line = br.readLine();
             assertEquals("id,type,name,status,description,epic", line,
-                    "Ошибка сохранения: шапка таблицы в начале файла не найдена");
+                    "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ: С€Р°РїРєР° С‚Р°Р±Р»РёС†С‹ РІ РЅР°С‡Р°Р»Рµ С„Р°Р№Р»Р° РЅРµ РЅР°Р№РґРµРЅР°");
 
             line = br.readLine();
             assertEquals("1,TASK,TaskName,NEW,TaskDescription,null", line,
-                    "Ошибка сохранения: задача сохранена некорректно");
+                    "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ: Р·Р°РґР°С‡Р° СЃРѕС…СЂР°РЅРµРЅР° РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ");
 
             line = br.readLine();
             assertEquals("2,EPIC,EpicName,NEW,EpicDescription,null", line,
-                    "Ошибка сохранения: эпик сохранен некорректно");
+                    "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ: СЌРїРёРє СЃРѕС…СЂР°РЅРµРЅ РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ");
 
             line = br.readLine();
             assertEquals("3,SUBTASK,SubtaskName,NEW,SubtaskDescription,2", line,
-                    "Ошибка сохранения: эпик сохранен некорректно");
+                    "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ: СЌРїРёРє СЃРѕС…СЂР°РЅРµРЅ РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ");
 
             line = br.readLine();
-            assertTrue(line == null || line.isBlank(), "Ошибка сохранения: обнаружены лишние символы");
+            assertTrue(line == null || line.isBlank(), "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ: РѕР±РЅР°СЂСѓР¶РµРЅС‹ Р»РёС€РЅРёРµ СЃРёРјРІРѕР»С‹");
 
         } catch (IOException e) {
-            throw new RuntimeException("Ошибка при работе с тестовым файлом: " + file, e);
+            throw new RuntimeException("РћС€РёР±РєР° РїСЂРё СЂР°Р±РѕС‚Рµ СЃ С‚РµСЃС‚РѕРІС‹Рј С„Р°Р№Р»РѕРј: " + file, e);
         }
     }
 
     @Test
-    @DisplayName("Корректная загрузка задач")
+    @DisplayName("РљРѕСЂСЂРµРєС‚РЅР°СЏ Р·Р°РіСЂСѓР·РєР° Р·Р°РґР°С‡")
     void shouldLoadTasksCorrect() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file.toFile()))) {
             writer.append("""
@@ -85,13 +85,13 @@ public class FileBackedTaskManagerTest {
                     """);
             writer.flush();
         } catch (IOException e) {
-            throw new RuntimeException("Ошибка записи во временный файл: " + file, e);
+            throw new RuntimeException("РћС€РёР±РєР° Р·Р°РїРёСЃРё РІРѕ РІСЂРµРјРµРЅРЅС‹Р№ С„Р°Р№Р»: " + file, e);
         }
 
         taskManager = new FileBackedTaskManager(new InMemoryHistoryManager(), file);
 
-        assertEquals(1, taskManager.getTask(1).getId(), "Ошибка загрузки данных из файла");
-        assertEquals(2, taskManager.getEpic(2).getId(), "Ошибка загрузки данных из файла");
-        assertEquals(3, taskManager.getSubtask(3).getId(), "Ошибка загрузки данных из файла");
+        assertEquals(1, taskManager.getTask(1).getId(), "РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С… РёР· С„Р°Р№Р»Р°");
+        assertEquals(2, taskManager.getEpic(2).getId(), "РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С… РёР· С„Р°Р№Р»Р°");
+        assertEquals(3, taskManager.getSubtask(3).getId(), "РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С… РёР· С„Р°Р№Р»Р°");
     }
 }

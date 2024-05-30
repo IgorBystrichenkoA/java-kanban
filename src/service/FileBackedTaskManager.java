@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -26,7 +27,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager{
         if (inputStream == null) {
             return;
         }
-        Scanner scanner = new Scanner(inputStream).useDelimiter("\\A");
+        Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8).useDelimiter("\\A");
+
 
         if (scanner.hasNext()) {
             scanner.nextLine();
@@ -107,7 +109,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager{
             }
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file.toFile()))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file.toFile(), StandardCharsets.UTF_8))) {
             writer.append("id,type,name,status,description,epic");
             writer.newLine();
 
