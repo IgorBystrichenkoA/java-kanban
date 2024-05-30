@@ -29,7 +29,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager{
         }
         Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8).useDelimiter("\\A");
 
-
         if (scanner.hasNext()) {
             scanner.nextLine();
         }
