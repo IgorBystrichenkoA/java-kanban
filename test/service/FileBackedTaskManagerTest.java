@@ -4,46 +4,49 @@ import model.Epic;
 import model.Status;
 import model.Subtask;
 import model.Task;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
-import java.nio.file.Files;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("Менеджер задач сохранением в файл")
+@DisplayName("Менеджер задач с сохранением в файл")
 public class FileBackedTaskManagerTest {
     static TaskManager taskManager;
     static Path file;
 
-    @BeforeEach
-    void setUp() {
-        HistoryManager historyManager = new InMemoryHistoryManager();
+    @BeforeAll
+    static void beforeAll() {
         try {
-            file = Files.createTempFile("test", ".csv");
-        } catch (IOException e) {
-            throw new RuntimeException("Не удалось создать тестовый файл", e);
+            URI uri = FileBackedTaskManagerTest.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+            file = Paths.get(uri).resolve(Paths.get("test.csv"));
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
-        taskManager = new FileBackedTaskManager(historyManager, file);
     }
 
-    @AfterEach
-    void after() {
+    @BeforeEach
+    void setUp() {
         try {
-            Files.delete(file);
+            new FileWriter(file.toFile(), false).close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Ошибка при очистке файла в setUp: " + file, e);
         }
     }
 
     @Test
     @DisplayName("Корректное сохранение задач")
     void shouldSaveTasksCorrect() {
+        taskManager = new FileBackedTaskManager(new InMemoryHistoryManager(), file);
+
         taskManager.createTask(new Task("TaskName", "TaskDescription", Status.NEW));
         Epic epic1 = taskManager.createEpic(new Epic("EpicName", "EpicDescription"));
         taskManager.createSubtask(new Subtask("SubtaskName", "SubtaskDescription", Status.NEW, epic1));
