@@ -10,15 +10,21 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
-    private final Path file;
+    protected final Path file;
+    protected final Map<TaskType, Map<Integer, ? extends Task>> taskMap;
 
     public FileBackedTaskManager(HistoryManager historyManager, Path file) {
         super(historyManager);
         this.file = file;
+        this.taskMap = new HashMap<>();
+        taskMap.put(TaskType.TASK, tasks);
+        taskMap.put(TaskType.EPIC, epics);
+        taskMap.put(TaskType.SUBTASK, subtasks);
         loadFromFile();
     }
 
@@ -44,19 +50,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 seq = id;
             }
 
-            switch (task.getType()) {
-                case TASK:
-                    tasks.put(task.getId(), task);
-                    break;
+            @SuppressWarnings("unchecked")
+            Map<Integer, Task> temp = (Map<Integer, Task>) taskMap.get(task.getType());
+            temp.put(task.getId(), task);
+        }
 
-                case SUBTASK:
-                    subtasks.put(task.getId(), (Subtask) task);
-                    break;
-
-                case EPIC:
-                    epics.put(task.getId(), (Epic) task);
-                    break;
-            }
+        for (Map.Entry<Integer, Epic> epic : epics.entrySet()) {
+            epic.getValue().updateStatus();
         }
     }
 
@@ -90,7 +90,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
             case SUBTASK:
                 Epic epic = epics.get(epicId);
-                return new Subtask(id, name, description, status, epic);
+                Subtask subtask = new Subtask(id, name, description, status, epic);
+                epic.addSubtask(subtask);
+                return subtask;
         }
 
         return null;
@@ -101,7 +103,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             try {
                 Files.createFile(file);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new ManagerSaveException("Ошибка при создании файла сохранения: " + file, e);
             }
         }
 
@@ -126,7 +128,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
             writer.flush();
         } catch (IOException e) {
-            throw new RuntimeException("Ошибка в файле: " + file, e);
+            throw new ManagerSaveException("Ошибка в файле: " + file, e);
         }
     }
 

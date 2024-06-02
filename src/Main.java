@@ -2,16 +2,14 @@ import model.Epic;
 import model.Status;
 import model.Subtask;
 import model.Task;
-import service.FileBackedTaskManager;
 import service.Managers;
 import service.TaskManager;
 
 public class Main {
     public static void main(String[] args) {
 
-        FileBackedTaskManager manager = (FileBackedTaskManager) Managers.getDefault();
+        TaskManager manager = Managers.getDefault();
         createTest(manager);
-
     }
 
     private static void printHistory(TaskManager manager) {
