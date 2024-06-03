@@ -7,26 +7,9 @@ import service.TaskManager;
 
 public class Main {
     public static void main(String[] args) {
+
         TaskManager manager = Managers.getDefault();
-
         createTest(manager);
-
-        manager.getTask(2);
-        manager.getTask(1);
-        manager.getSubtask(4);
-        manager.getEpic(7);
-        printHistory(manager);
-
-        manager.getTask(1);
-        manager.getSubtask(4);
-        manager.getEpic(3);
-        printHistory(manager);
-
-        manager.deleteTask(1);
-        printHistory(manager);
-
-        manager.deleteEpic(3);
-        printHistory(manager);
     }
 
     private static void printHistory(TaskManager manager) {
