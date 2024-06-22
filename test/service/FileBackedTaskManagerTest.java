@@ -27,7 +27,6 @@ public class FileBackedTaskManagerTest {
     static void beforeAll() throws URISyntaxException {
         URI uri = FileBackedTaskManagerTest.class.getProtectionDomain().getCodeSource().getLocation().toURI();
         file = Paths.get(uri).resolve(Paths.get("test.csv"));
-
     }
 
     @BeforeEach
@@ -46,19 +45,19 @@ public class FileBackedTaskManagerTest {
 
         BufferedReader br = new BufferedReader(new FileReader(file.toFile()));
         String line = br.readLine();
-        assertEquals("id,type,name,status,description,epic", line,
+        assertEquals("id,type,name,status,description,epic,duration,startTime", line,
                 "Ошибка сохранения: шапка таблицы в начале файла не найдена");
 
         line = br.readLine();
-        assertEquals("1,TASK,TaskName,NEW,TaskDescription,null", line,
+        assertEquals("1,TASK,TaskName,NEW,TaskDescription,null,null,null", line,
                 "Ошибка сохранения: задача сохранена некорректно");
 
         line = br.readLine();
-        assertEquals("2,EPIC,EpicName,NEW,EpicDescription,null", line,
+        assertEquals("2,EPIC,EpicName,NEW,EpicDescription,null,null,null", line,
                 "Ошибка сохранения: эпик сохранен некорректно");
 
         line = br.readLine();
-        assertEquals("3,SUBTASK,SubtaskName,NEW,SubtaskDescription,2", line,
+        assertEquals("3,SUBTASK,SubtaskName,NEW,SubtaskDescription,2,null,null", line,
                 "Ошибка сохранения: эпик сохранен некорректно");
 
         line = br.readLine();
@@ -70,10 +69,10 @@ public class FileBackedTaskManagerTest {
     void shouldLoadTasksCorrect() throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(file.toFile()));
         writer.append("""
-                id,type,name,status,description,epic
-                1,TASK,TaskName,NEW,TaskDescription,null
-                2,EPIC,EpicName,NEW,EpicDescription,null
-                3,SUBTASK,SubtaskName,NEW,SubtaskDescription,2
+                id,type,name,status,description,epic,duration,startTime
+                1,TASK,TaskName,NEW,TaskDescription,null,null,null
+                2,EPIC,EpicName,NEW,EpicDescription,null,null,null
+                3,SUBTASK,SubtaskName,NEW,SubtaskDescription,2,null,null
                 """);
         writer.flush();
 
@@ -83,4 +82,5 @@ public class FileBackedTaskManagerTest {
         assertEquals(2, taskManager.getEpic(2).getId(), "Ошибка загрузки данных из файла");
         assertEquals(3, taskManager.getSubtask(3).getId(), "Ошибка загрузки данных из файла");
     }
+
 }

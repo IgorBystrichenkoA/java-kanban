@@ -1,6 +1,7 @@
 package service;
 
 import converter.TaskConverter;
+import exception.ManagerSaveException;
 import model.*;
 
 import java.io.BufferedWriter;
@@ -10,9 +11,13 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     protected final Path file;
@@ -38,6 +43,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         if (scanner.hasNext()) {
             scanner.nextLine();
         }
+
         while (scanner.hasNext()) {
             String line = scanner.nextLine();
             if (line.isBlank()) {
@@ -53,11 +59,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             @SuppressWarnings("unchecked")
             Map<Integer, Task> temp = (Map<Integer, Task>) taskMap.get(task.getType());
             temp.put(task.getId(), task);
+            if (task.getType() != TaskType.EPIC && task.getStartTime() != null && task.getDuration() != null) {
+                validateTask(task);
+                prioritizedTasks.add(task);
+            }
         }
 
-        for (Map.Entry<Integer, Epic> epic : epics.entrySet()) {
-            epic.getValue().updateStatus();
-        }
+        epics.values().forEach(Epic::update);
     }
 
     private InputStream getFileAsInputStream(final Path file) {
@@ -65,7 +73,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private Task fromString(String value) {
-        // id,type,name,status,description,epic
+        // id,type,name,status,description,epic,duration,startTime
         String[] values = value.split(",");
 
         Integer id = null;
@@ -80,17 +88,25 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         if (!values[5].equals("null")) {
             epicId = Integer.parseInt(values[5]);
         }
+        Duration duration = null;
+        if (!values[6].equals("null")) {
+            duration = Duration.ofMinutes(Long.parseLong(values[6]));
+        }
+        LocalDateTime startTime = null;
+        if (!values[7].equals("null")) {
+            startTime = LocalDateTime.parse(values[7]);
+        }
 
         switch (type) {
             case TASK:
-                return new Task(id, name, description, status);
+                return new Task(id, name, description, status, startTime, duration);
 
             case EPIC:
                 return new Epic(id, name, description);
 
             case SUBTASK:
                 Epic epic = epics.get(epicId);
-                Subtask subtask = new Subtask(id, name, description, status, epic);
+                Subtask subtask = new Subtask(id, name, description, status, epic, startTime, duration);
                 epic.addSubtask(subtask);
                 return subtask;
         }
@@ -107,24 +123,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
         }
 
+        
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file.toFile(), StandardCharsets.UTF_8))) {
-            writer.append("id,type,name,status,description,epic");
+            writer.append("id,type,name,status,description,epic,duration,startTime");
             writer.newLine();
 
-            for (Map.Entry<Integer, Task> entry : tasks.entrySet()) {
-                writer.append(TaskConverter.toString(entry.getValue()));
-                writer.newLine();
-            }
-
-            for (Map.Entry<Integer, Epic> entry : epics.entrySet()) {
-                writer.append(TaskConverter.toString(entry.getValue()));
-                writer.newLine();
-            }
-
-            for (Map.Entry<Integer, Subtask> entry : subtasks.entrySet()) {
-                writer.append(TaskConverter.toString(entry.getValue()));
-                writer.newLine();
-            }
+            Stream.of(tasks.values(), epics.values(), subtasks.values())
+                    .flatMap(Collection::stream)
+                    .forEach(task -> {
+                        try {
+                            writer.write(TaskConverter.toString(task));
+                            writer.newLine();
+                        } catch (IOException e) {
+                            throw new ManagerSaveException("Ошибка записи задачи: " + task, e);
+                        }
+                    });
 
             writer.flush();
         } catch (IOException e) {

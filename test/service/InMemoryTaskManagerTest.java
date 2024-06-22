@@ -1,5 +1,6 @@
 package service;
 
+import exception.ValidateException;
 import model.Epic;
 import model.Status;
 import model.Subtask;
@@ -8,11 +9,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Менеджер задач")
 class InMemoryTaskManagerTest {
@@ -56,8 +59,7 @@ class InMemoryTaskManagerTest {
     @Test
     @DisplayName("Если подзадачу нельзя создать, счетсик id не должен быть увеличен")
     void shouldNotIncreaseIdCounterWhenSubtaskNotCreate() {
-        Subtask subtask = taskManager.createSubtask(new Subtask("1", "", Status.NEW,
-                new Epic("", "")));
+        taskManager.createSubtask(new Subtask("1", "", Status.NEW, new Epic("", "")));
         Task task = taskManager.createTask(new Task("1", "", Status.NEW));
         int id = task.getId();
 
@@ -112,4 +114,49 @@ class InMemoryTaskManagerTest {
         assertEquals(subtask, historyList.get(2),"Subtask при получении по id не был добавлен в историю");
     }
 
+    @Test
+    @DisplayName("Проверка валидации времени выполнения задач и подзадач")
+    public void shouldThrowValidateExceptionWhenTasksIntersect() {
+        Task task = new Task("", "", Status.NEW,
+                LocalDateTime.of(2000, 10, 10, 10, 10), Duration.ofMinutes(15));
+
+        assertThrows(ValidateException.class, () -> {
+            taskManager.createTask(task);
+            taskManager.createTask(task);
+        }, "Ожидалась ValidateException при создании пересекающейся задачи");
+
+        assertThrows(ValidateException.class, () -> {
+            taskManager.createTask(task);
+            task.setStartTime(task.getStartTime().plusDays(1));
+            Task task2 = taskManager.createTask(task);
+            task2.setStartTime(task.getStartTime().minusDays(1));
+            taskManager.updateTask(task2);
+        }, "Ожидалась ValidateException при изменении времени на пересекающееся у задачи");
+    }
+
+    @Test
+    @DisplayName("Проверка валидации времени выполнения задач и подзадач")
+    public void shouldCorrectReturnPrioritizedTasks() {
+        LocalDateTime someDate = LocalDateTime.of(2000, 10, 10, 10, 10);
+        Task task1 = taskManager.createTask(new Task("Задача 1", "", Status.NEW,
+                someDate, Duration.ofMinutes(15)));
+        Task task2 = taskManager.createTask(new Task("Задача 2", "", Status.NEW,
+                someDate.minusDays(1), Duration.ofMinutes(15)));
+        Epic epic = taskManager.createEpic(new Epic("Эпик 1", ""));
+        Subtask subtask = taskManager.createSubtask(new Subtask("Подзадача 1", "Описание подзадачи 1.1",
+                Status.IN_PROGRESS, epic, someDate.plusDays(1), Duration.ofMinutes(15)));
+        taskManager.createTask(new Task("Задача без времени", "", Status.NEW));
+
+        assertArrayEquals(Stream.of(task2, task1, subtask).toArray(), taskManager.getPrioritizedTasks().toArray(),
+                "Получен неверный массив приоритетных задач после создания");
+
+        taskManager.deleteTask(task1.getId());
+        assertArrayEquals(Stream.of(task2, subtask).toArray(), taskManager.getPrioritizedTasks().toArray(),
+                "Получен неверный массив приоритетных задач после удаления задачи");
+
+        subtask.setStartTime(task1.getStartTime().minusDays(3));
+        taskManager.updateSubtask(subtask);
+        assertArrayEquals(Stream.of(subtask, task2).toArray(), taskManager.getPrioritizedTasks().toArray(),
+                "Получен неверный массив приоритетных задач после изменения задачи");
+    }
 }

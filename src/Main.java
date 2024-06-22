@@ -5,11 +5,14 @@ import model.Task;
 import service.Managers;
 import service.TaskManager;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class Main {
     public static void main(String[] args) {
-
         TaskManager manager = Managers.getDefault();
-        createTest(manager);
+        manager.getPrioritizedTasks().forEach(System.out::println);
+        //createTest(manager);
     }
 
     private static void printHistory(TaskManager manager) {
@@ -20,17 +23,19 @@ public class Main {
     }
 
     private static void createTest(TaskManager taskManager) {
-        Task task1 = taskManager.createTask(new Task("Задача 1", "Описание 1.1", Status.NEW));
+        Task task1 = taskManager.createTask(new Task("Задача 1", "Описание 1.1", Status.NEW,
+                LocalDateTime.now().plus(Duration.ofHours(2)), Duration.ofMinutes(15)));
         System.out.println("Create task " + task1);
 
-        Task task2 = taskManager.createTask(new Task("Задача 2", "Описание 2.1", Status.IN_PROGRESS));
+        Task task2 = taskManager.createTask(new Task("Задача 2", "Описание 2.1", Status.IN_PROGRESS,
+                LocalDateTime.now().plus(Duration.ofHours(4)), Duration.ofMinutes(15)));
         System.out.println("Create task " + task2);
 
         Epic epic1 = taskManager.createEpic(new Epic("Эпик 1", "Эпик с 3 подзадачами"));
         System.out.println("Create epic " + epic1);
 
         Subtask subtask1 = taskManager.createSubtask(new Subtask("Подзадача 1", "Описание подзадачи 1.1",
-                Status.IN_PROGRESS, epic1));
+                Status.IN_PROGRESS, epic1, LocalDateTime.now().plus(Duration.ofHours(3)), Duration.ofMinutes(15)));
         System.out.println("Create subtask " + subtask1);
 
         Subtask subtask2 = taskManager.createSubtask(new Subtask("Подзадача 2", "Описание подзадачи 2.1",

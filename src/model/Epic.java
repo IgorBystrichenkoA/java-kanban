@@ -1,12 +1,17 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Epic extends Task {
 
     private final Collection<Subtask> subtasks = new HashSet<>();
+    private LocalDateTime endTime;
 
     public Epic(String name, String description) {
         super(name, description, Status.NEW);
@@ -36,25 +41,33 @@ public class Epic extends Task {
     public void setStatus(Status status) {
     }
 
-    public void updateStatus() {
-        if (subtasks.isEmpty()) {
-            status = Status.NEW;
-            return;
+    public void update() {
+
+        Set<Status> statuses = subtasks.stream().map(Task::getStatus).collect(Collectors.toSet());
+        switch (statuses.size()) {
+            case 0: status = Status.NEW; break;
+            case 1: status = statuses.iterator().next(); break;
+            default: status = Status.IN_PROGRESS;
         }
-        Set<Status> statuses = new HashSet<>();
-        for (Subtask subtask : subtasks) {
-            statuses.add(subtask.getStatus());
-        }
-        if (statuses.size() == 1) {
-            status = statuses.iterator().next();
+
+        startTime = subtasks.stream()
+                .filter(subtask -> subtask.getStartTime() != null)
+                .min(Comparator.comparing(Task::getStartTime))
+                .map(Task::getStartTime).orElse(null);
+        endTime = subtasks.stream()
+                .filter(subtask -> subtask.getEndTime() != null)
+                .max(Comparator.comparing(Task::getEndTime))
+                .map(Task::getEndTime).orElse(null);
+        if (startTime != null && endTime != null) {
+            duration = Duration.between(startTime, endTime);
         } else {
-            status = Status.IN_PROGRESS;
+            duration = null;
         }
     }
 
     @Override
-    public Integer getEpicId() {
-        return null;
+    public LocalDateTime getEndTime() {
+        return endTime;
     }
 
     @Override
@@ -70,6 +83,8 @@ public class Epic extends Task {
                 ", description='" + description + '\'' +
                 ", status=" + status +
                 ", subtasks.size=" + subtasks.size() +
+                ", duration=" + duration +
+                ", startTime=" + startTime +
                 '}';
     }
 }

@@ -26,10 +26,10 @@ class EpicTest {
     public void shouldSetStatusNewWhenUpdateAndZeroSubtasks() {
         Subtask subtask1 = new Subtask("Test Subtask", "", Status.IN_PROGRESS, epic);
         epic.addSubtask(subtask1);
-        epic.updateStatus();
+        epic.update();
 
         epic.deleteAllSubtasks();
-        epic.updateStatus();
+        epic.update();
         assertEquals(Status.NEW, epic.getStatus(),"При пустом списке подзадач и обновлении эпика статус не " +
                 "устанавливается на NEW");
     }
@@ -41,19 +41,19 @@ class EpicTest {
         Subtask subtask2 = new Subtask(2, "Test Subtask", "", Status.IN_PROGRESS, epic);
         epic.addSubtask(subtask1);
         epic.addSubtask(subtask2);
-        epic.updateStatus();
+        epic.update();
         assertEquals(Status.IN_PROGRESS, epic.getStatus(),"Если все подзадачи имеют статус IN_PROGRESS, " +
                 "то и эпик должен иметь статус IN_PROGRESS");
 
         subtask1.setStatus(Status.DONE);
         subtask2.setStatus(Status.DONE);
-        epic.updateStatus();
+        epic.update();
         assertEquals(Status.DONE, epic.getStatus(),"Если все подзадачи имеют статус DONE, " +
                 "то и эпик должен иметь статус DONE");
 
         subtask1.setStatus(Status.NEW);
         subtask2.setStatus(Status.NEW);
-        epic.updateStatus();
+        epic.update();
         assertEquals(Status.NEW, epic.getStatus(),"Если все подзадачи имеют статус NEW, " +
                 "то и эпик должен иметь статус NEW");
     }
@@ -65,7 +65,7 @@ class EpicTest {
         Subtask subtask2 = new Subtask(2, "Test Subtask", "", Status.DONE, epic);
         epic.addSubtask(subtask1);
         epic.addSubtask(subtask2);
-        epic.updateStatus();
+        epic.update();
         assertEquals(Status.IN_PROGRESS, epic.getStatus(),"Статус эпика не установился в IN_PROGRESS при " +
                 "разных статусах подзадач");
     }
