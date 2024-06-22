@@ -123,7 +123,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
         }
 
-        
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file.toFile(), StandardCharsets.UTF_8))) {
             writer.append("id,type,name,status,description,epic,duration,startTime");
             writer.newLine();
