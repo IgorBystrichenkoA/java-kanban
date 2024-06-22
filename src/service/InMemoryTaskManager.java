@@ -90,20 +90,25 @@ public class InMemoryTaskManager implements TaskManager {
 //    Создание. Сам объект должен передаваться в качестве параметра.
     @Override
     public Task createTask(Task task) {
-        task.setId(generateId());
-        tasks.put(task.getId(), task);
+        Task newTask = new Task(task.getName(), task.getDescription(), task.getStatus());
+
+        newTask.setId(generateId());
         if (task.getStartTime() != null) {
-            validateTask(task);
-            prioritizedTasks.add(task);
+            newTask.setStartTime(task.getStartTime());
+            newTask.setDuration(task.getDuration());
+            validateTask(newTask);
+            prioritizedTasks.add(newTask);
         }
-        return task;
+        tasks.put(newTask.getId(), newTask);
+        return newTask;
     }
 
     @Override
     public Epic createEpic(Epic epic) {
-        epic.setId(generateId());
-        epics.put(epic.getId(), epic);
-        return epic;
+        Epic newEpic = new Epic(epic.getName(), epic.getDescription());
+        newEpic.setId(generateId());
+        epics.put(newEpic.getId(), newEpic);
+        return newEpic;
     }
 
     @Override
@@ -113,16 +118,20 @@ public class InMemoryTaskManager implements TaskManager {
         if (!epics.containsKey(epicFromManager.getId())) {
             return null;
         }
-        subtask.setId(generateId());
-        epicFromManager.addSubtask(subtask);
+
+        Subtask newSubtask = new Subtask(subtask.getName(), subtask.getDescription(), subtask.getStatus(),
+                epicFromManager, subtask.getStartTime(), subtask.getDuration());
+
+        newSubtask.setId(generateId());
+        epicFromManager.addSubtask(newSubtask);
         epicFromManager.update();
-        subtask.setEpic(epicFromManager);
-        if (subtask.getStartTime() != null) {
-            validateTask(subtask);
-            prioritizedTasks.add(subtask);
+        newSubtask.setEpic(epicFromManager);
+        if (newSubtask.getStartTime() != null) {
+            validateTask(newSubtask);
+            prioritizedTasks.add(newSubtask);
         }
-        subtasks.put(subtask.getId(), subtask);
-        return subtask;
+        subtasks.put(newSubtask.getId(), newSubtask);
+        return newSubtask;
     }
 
     private int generateId() {

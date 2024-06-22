@@ -135,7 +135,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    @DisplayName("Проверка валидации времени выполнения задач и подзадач")
+    @DisplayName("Проверка корректности возвращаемого списка приоритетных задач")
     public void shouldCorrectReturnPrioritizedTasks() {
         LocalDateTime someDate = LocalDateTime.of(2000, 10, 10, 10, 10);
         Task task1 = taskManager.createTask(new Task("Задача 1", "", Status.NEW,
