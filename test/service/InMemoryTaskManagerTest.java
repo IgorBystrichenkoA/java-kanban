@@ -30,7 +30,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     @DisplayName("При создании задачи, эпика и подзадечи должен увеличиваться счетчик id")
-    void shouldIncreaseIdCounterWhenCreate() {
+    void shouldIncreaseIdCounterWhenCreate() throws ValidateException {
         Task task1 = taskManager.createTask(new Task("1", "", Status.NEW));
         Task task2 = taskManager.createTask(new Task("2", "", Status.NEW));
         assertEquals(1, task2.getId() - task1.getId(), "Неправильное поведение счетчика id" +
@@ -58,7 +58,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     @DisplayName("Если подзадачу нельзя создать, счетсик id не должен быть увеличен")
-    void shouldNotIncreaseIdCounterWhenSubtaskNotCreate() {
+    void shouldNotIncreaseIdCounterWhenSubtaskNotCreate() throws ValidateException {
         taskManager.createSubtask(new Subtask("1", "", Status.NEW, new Epic("", "")));
         Task task = taskManager.createTask(new Task("1", "", Status.NEW));
         int id = task.getId();
@@ -98,7 +98,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     @DisplayName("При получении задач, эпиков или подзадач по id они должны добавляться в историю")
-    void shouldAddTasksInHistoryWhenGetById() {
+    void shouldAddTasksInHistoryWhenGetById() throws ValidateException {
         Task task = taskManager.createTask(new Task(1, "1", "", Status.NEW));
         Epic epic = taskManager.createEpic(new Epic(2, "", ""));
         Subtask subtask = taskManager.createSubtask(new Subtask(3,"1", "", Status.NEW, epic));
@@ -136,7 +136,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     @DisplayName("Проверка корректности возвращаемого списка приоритетных задач")
-    public void shouldCorrectReturnPrioritizedTasks() {
+    public void shouldCorrectReturnPrioritizedTasks() throws ValidateException {
         LocalDateTime someDate = LocalDateTime.of(2000, 10, 10, 10, 10);
         Task task1 = taskManager.createTask(new Task("Задача 1", "", Status.NEW,
                 someDate, Duration.ofMinutes(15)));

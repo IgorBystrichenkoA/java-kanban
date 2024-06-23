@@ -89,7 +89,7 @@ public class InMemoryTaskManager implements TaskManager {
 
 //    Создание. Сам объект должен передаваться в качестве параметра.
     @Override
-    public Task createTask(Task task) {
+    public Task createTask(Task task) throws ValidateException {
         Task newTask = new Task(task.getName(), task.getDescription(), task.getStatus());
 
         newTask.setId(generateId());
@@ -127,7 +127,11 @@ public class InMemoryTaskManager implements TaskManager {
         epicFromManager.update();
         newSubtask.setEpic(epicFromManager);
         if (newSubtask.getStartTime() != null) {
-            validateTask(newSubtask);
+            try {
+                validateTask(newSubtask);
+            } catch (ValidateException e) {
+                return null;
+            }
             prioritizedTasks.add(newSubtask);
         }
         subtasks.put(newSubtask.getId(), newSubtask);
@@ -140,7 +144,7 @@ public class InMemoryTaskManager implements TaskManager {
 
 //    Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
     @Override
-    public void updateTask(Task task) {
+    public void updateTask(Task task) throws ValidateException {
         Task saved = tasks.get(task.getId());
         if (saved == null) {
             return;
@@ -163,7 +167,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateSubtask(Subtask subtask) {
+    public void updateSubtask(Subtask subtask) throws ValidateException {
         Subtask saved = subtasks.get(subtask.getId());
         if (saved == null) {
             return;
@@ -186,7 +190,7 @@ public class InMemoryTaskManager implements TaskManager {
         saved.getEpic().update();
     }
 
-    private void updateTaskTime(Task saved, Task newTask) {
+    private void updateTaskTime(Task saved, Task newTask) throws ValidateException {
         if (newTask.getStartTime() != null && newTask.getDuration() != null) {
             validateTask(newTask);
             prioritizedTasks.remove(saved);
@@ -247,11 +251,12 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getAll();
     }
 
-    protected void validateTask(Task task) {
-        Optional<Task> inter = prioritizedTasks.stream().filter(temp -> !Objects.equals(temp.getId(), task.getId()) &&
-                !temp.getStartTime().isAfter(task.getEndTime()) &&
-                !task.getStartTime().isAfter(temp.getEndTime())
-        ).findAny();
+    protected void validateTask(Task task) throws ValidateException {
+        Optional<Task> inter = prioritizedTasks.stream()
+                .filter(temp -> !Objects.equals(temp.getId(), task.getId()))
+                .filter(temp -> !temp.getStartTime().isAfter(task.getEndTime()))
+                .filter(temp -> !task.getStartTime().isAfter(temp.getEndTime()))
+                .findAny();
 
         if (inter.isPresent()) {
             throw new ValidateException("Пересечение с задачей: " + inter.get());

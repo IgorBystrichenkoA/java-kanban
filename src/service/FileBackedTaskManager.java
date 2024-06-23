@@ -2,6 +2,7 @@ package service;
 
 import converter.TaskConverter;
 import exception.ManagerSaveException;
+import exception.ValidateException;
 import model.*;
 
 import java.io.BufferedWriter;
@@ -23,7 +24,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     protected final Path file;
     protected final Map<TaskType, Map<Integer, ? extends Task>> taskMap;
 
-    public FileBackedTaskManager(HistoryManager historyManager, Path file) {
+    public FileBackedTaskManager(HistoryManager historyManager, Path file) throws ValidateException {
         super(historyManager);
         this.file = file;
         this.taskMap = new HashMap<>();
@@ -33,7 +34,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         loadFromFile();
     }
 
-    public void loadFromFile() {
+    public void loadFromFile() throws ValidateException {
         InputStream inputStream = getFileAsInputStream(file);
         if (inputStream == null) {
             return;
@@ -84,17 +85,23 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = values[2];
         Status status = Status.valueOf(values[3]);
         String description = values[4];
+
         Integer epicId = null;
-        if (!values[5].equals("null")) {
-            epicId = Integer.parseInt(values[5]);
+        String epicValue = values[5];
+        if (!epicValue.equals("null")) {
+            epicId = Integer.parseInt(epicValue);
         }
+
         Duration duration = null;
-        if (!values[6].equals("null")) {
-            duration = Duration.ofMinutes(Long.parseLong(values[6]));
+        String durationValue = values[6];
+        if (!durationValue.equals("null")) {
+            duration = Duration.ofMinutes(Long.parseLong(durationValue));
         }
+
         LocalDateTime startTime = null;
-        if (!values[7].equals("null")) {
-            startTime = LocalDateTime.parse(values[7]);
+        String startTimeValue = values[7];
+        if (!startTimeValue.equals("null")) {
+            startTime = LocalDateTime.parse(startTimeValue);
         }
 
         switch (type) {
@@ -163,7 +170,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Task createTask(Task task) {
+    public Task createTask(Task task) throws ValidateException {
         Task temp = super.createTask(task);
         save();
         return temp;
@@ -185,7 +192,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateTask(Task task) {
+    public void updateTask(Task task) throws ValidateException {
         super.updateTask(task);
         save();
     }
@@ -197,7 +204,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateSubtask(Subtask subtask) {
+    public void updateSubtask(Subtask subtask) throws ValidateException {
         super.updateSubtask(subtask);
         save();
     }

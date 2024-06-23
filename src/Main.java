@@ -1,3 +1,4 @@
+import exception.ValidateException;
 import model.Epic;
 import model.Status;
 import model.Subtask;
@@ -22,7 +23,7 @@ public class Main {
         }
     }
 
-    private static void createTest(TaskManager taskManager) {
+    private static void createTest(TaskManager taskManager) throws ValidateException {
         Task task1 = taskManager.createTask(new Task("Задача 1", "Описание 1.1", Status.NEW,
                 LocalDateTime.now().plus(Duration.ofHours(2)), Duration.ofMinutes(15)));
         System.out.println("Create task " + task1);

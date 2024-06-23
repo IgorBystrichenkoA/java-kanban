@@ -1,5 +1,6 @@
 package service;
 
+import exception.ValidateException;
 import model.Epic;
 import model.Status;
 import model.Subtask;
@@ -36,7 +37,7 @@ public class FileBackedTaskManagerTest {
 
     @Test
     @DisplayName("Корректное сохранение задач")
-    void shouldSaveTasksCorrect() throws IOException {
+    void shouldSaveTasksCorrect() throws IOException, ValidateException {
         taskManager = new FileBackedTaskManager(new InMemoryHistoryManager(), file);
 
         taskManager.createTask(new Task("TaskName", "TaskDescription", Status.NEW));
@@ -66,7 +67,7 @@ public class FileBackedTaskManagerTest {
 
     @Test
     @DisplayName("Корректная загрузка задач")
-    void shouldLoadTasksCorrect() throws IOException {
+    void shouldLoadTasksCorrect() throws IOException, ValidateException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(file.toFile()));
         writer.append("""
                 id,type,name,status,description,epic,duration,startTime
