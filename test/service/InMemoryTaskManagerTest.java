@@ -49,7 +49,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     @DisplayName("Если подзадачу нельзя создать, счетсик id не должен быть увеличен")
-    void shouldReturnNullWhenSubtaskNotCreate() {
+    void shouldReturnNullWhenSubtaskNotCreate() throws ValidateException {
         Subtask subtask = taskManager.createSubtask(new Subtask("1", "", Status.NEW,
                 new Epic("", "")));
 
@@ -68,7 +68,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     @DisplayName("При удалении всех эпиков должны удаляться и все подзадачи")
-    void shouldRemoveAllSubtasksWhenRemoveAllEpics() {
+    void shouldRemoveAllSubtasksWhenRemoveAllEpics() throws ValidateException {
         Epic epic1 = taskManager.createEpic(new Epic("", ""));
         Epic epic2 = taskManager.createEpic(new Epic("", ""));
         taskManager.createSubtask(new Subtask("1", "", Status.NEW, epic1));
@@ -81,7 +81,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     @DisplayName("При удалении всех подзадач они должны удаляться и у всех эпиков, при этом эпики должны быть обновлены")
-    void shouldUpdateEpicsWhenRemoveAllSubtasks() {
+    void shouldUpdateEpicsWhenRemoveAllSubtasks() throws ValidateException {
         Epic epic1 = taskManager.createEpic(new Epic("", ""));
         Epic epic2 = taskManager.createEpic(new Epic("", ""));
         taskManager.createSubtask(new Subtask("1", "", Status.NEW, epic1));

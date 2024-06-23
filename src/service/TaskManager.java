@@ -31,7 +31,7 @@ public interface TaskManager {
 
     Epic createEpic(Epic epic);
 
-    Subtask createSubtask(Subtask subtask);
+    Subtask createSubtask(Subtask subtask) throws ValidateException;
 
     void updateTask(Task task) throws ValidateException;
 

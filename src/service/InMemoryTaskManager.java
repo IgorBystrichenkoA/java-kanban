@@ -112,7 +112,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Subtask createSubtask(Subtask subtask) {
+    public Subtask createSubtask(Subtask subtask) throws ValidateException {
         Epic epicFromManager = subtask.getEpic();
         // Если предложенного эпика нет в таблице, то подзадачу не создаем
         if (!epics.containsKey(epicFromManager.getId())) {
@@ -127,11 +127,7 @@ public class InMemoryTaskManager implements TaskManager {
         epicFromManager.update();
         newSubtask.setEpic(epicFromManager);
         if (newSubtask.getStartTime() != null) {
-            try {
-                validateTask(newSubtask);
-            } catch (ValidateException e) {
-                return null;
-            }
+            validateTask(newSubtask);
             prioritizedTasks.add(newSubtask);
         }
         subtasks.put(newSubtask.getId(), newSubtask);
