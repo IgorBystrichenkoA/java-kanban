@@ -1,6 +1,8 @@
 package service;
 
 import converter.TaskConverter;
+import exception.ManagerSaveException;
+import exception.ValidateException;
 import model.*;
 
 import java.io.BufferedWriter;
@@ -10,15 +12,19 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     protected final Path file;
     protected final Map<TaskType, Map<Integer, ? extends Task>> taskMap;
 
-    public FileBackedTaskManager(HistoryManager historyManager, Path file) {
+    public FileBackedTaskManager(HistoryManager historyManager, Path file) throws ValidateException {
         super(historyManager);
         this.file = file;
         this.taskMap = new HashMap<>();
@@ -28,7 +34,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         loadFromFile();
     }
 
-    public void loadFromFile() {
+    public void loadFromFile() throws ValidateException {
         InputStream inputStream = getFileAsInputStream(file);
         if (inputStream == null) {
             return;
@@ -38,6 +44,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         if (scanner.hasNext()) {
             scanner.nextLine();
         }
+
         while (scanner.hasNext()) {
             String line = scanner.nextLine();
             if (line.isBlank()) {
@@ -53,11 +60,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             @SuppressWarnings("unchecked")
             Map<Integer, Task> temp = (Map<Integer, Task>) taskMap.get(task.getType());
             temp.put(task.getId(), task);
+            if (task.getType() != TaskType.EPIC && task.getStartTime() != null && task.getDuration() != null) {
+                validateTask(task);
+                prioritizedTasks.add(task);
+            }
         }
 
-        for (Map.Entry<Integer, Epic> epic : epics.entrySet()) {
-            epic.getValue().updateStatus();
-        }
+        epics.values().forEach(Epic::update);
     }
 
     private InputStream getFileAsInputStream(final Path file) {
@@ -65,7 +74,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private Task fromString(String value) {
-        // id,type,name,status,description,epic
+        // id,type,name,status,description,epic,duration,startTime
         String[] values = value.split(",");
 
         Integer id = null;
@@ -76,21 +85,35 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = values[2];
         Status status = Status.valueOf(values[3]);
         String description = values[4];
+
         Integer epicId = null;
-        if (!values[5].equals("null")) {
-            epicId = Integer.parseInt(values[5]);
+        String epicValue = values[5];
+        if (!epicValue.equals("null")) {
+            epicId = Integer.parseInt(epicValue);
+        }
+
+        Duration duration = null;
+        String durationValue = values[6];
+        if (!durationValue.equals("null")) {
+            duration = Duration.ofMinutes(Long.parseLong(durationValue));
+        }
+
+        LocalDateTime startTime = null;
+        String startTimeValue = values[7];
+        if (!startTimeValue.equals("null")) {
+            startTime = LocalDateTime.parse(startTimeValue);
         }
 
         switch (type) {
             case TASK:
-                return new Task(id, name, description, status);
+                return new Task(id, name, description, status, startTime, duration);
 
             case EPIC:
                 return new Epic(id, name, description);
 
             case SUBTASK:
                 Epic epic = epics.get(epicId);
-                Subtask subtask = new Subtask(id, name, description, status, epic);
+                Subtask subtask = new Subtask(id, name, description, status, epic, startTime, duration);
                 epic.addSubtask(subtask);
                 return subtask;
         }
@@ -108,23 +131,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file.toFile(), StandardCharsets.UTF_8))) {
-            writer.append("id,type,name,status,description,epic");
+            writer.append("id,type,name,status,description,epic,duration,startTime");
             writer.newLine();
 
-            for (Map.Entry<Integer, Task> entry : tasks.entrySet()) {
-                writer.append(TaskConverter.toString(entry.getValue()));
-                writer.newLine();
-            }
-
-            for (Map.Entry<Integer, Epic> entry : epics.entrySet()) {
-                writer.append(TaskConverter.toString(entry.getValue()));
-                writer.newLine();
-            }
-
-            for (Map.Entry<Integer, Subtask> entry : subtasks.entrySet()) {
-                writer.append(TaskConverter.toString(entry.getValue()));
-                writer.newLine();
-            }
+            Stream.of(tasks.values(), epics.values(), subtasks.values())
+                    .flatMap(Collection::stream)
+                    .forEach(task -> {
+                        try {
+                            writer.write(TaskConverter.toString(task));
+                            writer.newLine();
+                        } catch (IOException e) {
+                            throw new ManagerSaveException("Ошибка записи задачи: " + task, e);
+                        }
+                    });
 
             writer.flush();
         } catch (IOException e) {
@@ -151,7 +170,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Task createTask(Task task) {
+    public Task createTask(Task task) throws ValidateException {
         Task temp = super.createTask(task);
         save();
         return temp;
@@ -166,14 +185,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Subtask createSubtask(Subtask subtask) {
+    public Subtask createSubtask(Subtask subtask) throws ValidateException {
         Subtask temp = super.createSubtask(subtask);
         save();
         return temp;
     }
 
     @Override
-    public void updateTask(Task task) {
+    public void updateTask(Task task) throws ValidateException {
         super.updateTask(task);
         save();
     }
@@ -185,7 +204,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateSubtask(Subtask subtask) {
+    public void updateSubtask(Subtask subtask) throws ValidateException {
         super.updateSubtask(subtask);
         save();
     }
