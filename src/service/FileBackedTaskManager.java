@@ -24,7 +24,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     protected final Path file;
     protected final Map<TaskType, Map<Integer, ? extends Task>> taskMap;
 
-    public FileBackedTaskManager(HistoryManager historyManager, Path file) throws ValidateException {
+    public FileBackedTaskManager(HistoryManager historyManager, Path file) {
         super(historyManager);
         this.file = file;
         this.taskMap = new HashMap<>();
@@ -34,7 +34,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         loadFromFile();
     }
 
-    public void loadFromFile() throws ValidateException {
+    public void loadFromFile() {
         InputStream inputStream = getFileAsInputStream(file);
         if (inputStream == null) {
             return;
@@ -61,7 +61,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             Map<Integer, Task> temp = (Map<Integer, Task>) taskMap.get(task.getType());
             temp.put(task.getId(), task);
             if (task.getType() != TaskType.EPIC && task.getStartTime() != null && task.getDuration() != null) {
-                validateTask(task);
+                try {
+                    validateTask(task);
+                } catch (ValidateException e) {
+                    throw new ManagerSaveException("Ошибка валидации данных из файла: " + file, e);
+                }
                 prioritizedTasks.add(task);
             }
         }

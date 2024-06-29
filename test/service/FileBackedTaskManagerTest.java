@@ -1,5 +1,6 @@
 package service;
 
+import exception.NotFoundException;
 import exception.ValidateException;
 import model.Epic;
 import model.Status;
@@ -67,7 +68,7 @@ public class FileBackedTaskManagerTest {
 
     @Test
     @DisplayName("Корректная загрузка задач")
-    void shouldLoadTasksCorrect() throws IOException, ValidateException {
+    void shouldLoadTasksCorrect() throws IOException, NotFoundException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(file.toFile()));
         writer.append("""
                 id,type,name,status,description,epic,duration,startTime

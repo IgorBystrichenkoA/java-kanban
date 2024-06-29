@@ -1,5 +1,6 @@
 package service;
 
+import exception.NotFoundException;
 import exception.ValidateException;
 import model.Epic;
 import model.Status;
@@ -98,7 +99,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     @DisplayName("При получении задач, эпиков или подзадач по id они должны добавляться в историю")
-    void shouldAddTasksInHistoryWhenGetById() throws ValidateException {
+    void shouldAddTasksInHistoryWhenGetById() throws ValidateException, NotFoundException {
         Task task = taskManager.createTask(new Task(1, "1", "", Status.NEW));
         Epic epic = taskManager.createEpic(new Epic(2, "", ""));
         Subtask subtask = taskManager.createSubtask(new Subtask(3,"1", "", Status.NEW, epic));
