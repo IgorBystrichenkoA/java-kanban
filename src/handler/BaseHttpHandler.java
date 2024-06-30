@@ -20,8 +20,8 @@ public abstract class BaseHttpHandler {
         gson = HttpTaskServer.getGson();
     }
 
-    protected void sendResponce(HttpExchange exchange, String responce, int code) throws IOException {
-        byte[] resp = responce.getBytes(DEFAULT_CHARSET);
+    protected void sendResponse(HttpExchange exchange, String response, int code) throws IOException {
+        byte[] resp = response.getBytes(DEFAULT_CHARSET);
         int length = resp.length;
         if (code == HttpURLConnection.HTTP_NO_CONTENT) {
             length = -1;
@@ -32,5 +32,26 @@ public abstract class BaseHttpHandler {
             exchange.getResponseBody().write(resp);
         }
         exchange.close();
+    }
+
+    protected TaskEndpoint getEndpoint(String requestPath, String requestMethod, String initialPath) {
+        String[] pathParts = requestPath.split("/");
+
+        if (requestPath.equals(initialPath)) {
+            return switch (requestMethod) {
+                case "GET" -> TaskEndpoint.GET_ALL;
+                case "POST" -> TaskEndpoint.CREATE;
+                case "DELETE" -> TaskEndpoint.DELETE_ALL;
+                default -> TaskEndpoint.UNKNOWN;
+            };
+        } else if (pathParts.length == 3 && requestPath.indexOf(initialPath) == 0) {
+            return switch (requestMethod) {
+                case "GET" -> TaskEndpoint.GET;
+                case "POST" -> TaskEndpoint.UPDATE;
+                case "DELETE" -> TaskEndpoint.DELETE;
+                default -> TaskEndpoint.UNKNOWN;
+            };
+        }
+        return TaskEndpoint.UNKNOWN;
     }
 }

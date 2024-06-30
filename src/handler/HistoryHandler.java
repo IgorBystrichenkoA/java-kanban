@@ -17,29 +17,21 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        TaskEndpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
+        String path = exchange.getRequestURI().getPath();
+        String method = exchange.getRequestMethod();
+        String initialPath = "/history";
+        TaskEndpoint endpoint = getEndpoint(path, method, initialPath);
 
-        if (endpoint == TaskEndpoint.GET) {
+        if (endpoint == TaskEndpoint.GET_ALL) {
             handleGet(exchange);
         } else {
-            sendResponce(exchange, "Такого эндпоинта не существует", HttpURLConnection.HTTP_NOT_FOUND);
+            sendResponse(exchange, "Такого эндпоинта не существует", HttpURLConnection.HTTP_NOT_FOUND);
         }
     }
 
     private void handleGet(HttpExchange exchange) throws IOException {
         Collection<Task> history = manager.getHistory();
         String response = gson.toJson(history);
-        sendResponce(exchange, response, HttpURLConnection.HTTP_OK);
-    }
-
-    private TaskEndpoint getEndpoint(String requestPath, String requestMethod) {
-        String[] pathParts = requestPath.split("/");
-
-        if (pathParts.length == 2 && pathParts[1].equals("history")) {
-            if (requestMethod.equals("GET")) {
-                return TaskEndpoint.GET;
-            }
-        }
-        return TaskEndpoint.UNKNOWN;
+        sendResponse(exchange, response, HttpURLConnection.HTTP_OK);
     }
 }

@@ -21,7 +21,12 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         String path = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
-        String endpoint = getEndpoint(path, method);
+        String initialPath = "/epics";
+        String endpoint = getEndpoint(path, method, initialPath).name();
+
+        if (endpoint.equals("UNKNOWN") && checkGetSubtasks(path, method)) {
+            endpoint = "GET_SUBTASKS";
+        }
 
         switch (endpoint) {
             case "GET": {
@@ -53,8 +58,13 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
                 break;
             }
             default:
-                sendResponce(exchange, "Такого эндпоинта не существует", HttpURLConnection.HTTP_NOT_FOUND);
+                sendResponse(exchange, "Такого эндпоинта не существует", HttpURLConnection.HTTP_NOT_FOUND);
         }
+    }
+
+    private boolean checkGetSubtasks(String requestPath, String requestMethod) {
+        String[] pathParts = requestPath.split("/");
+        return pathParts.length == 4 && pathParts[1].equals("epics") && pathParts[3].equals("subtasks");
     }
 
     private void handleGet(HttpExchange exchange) throws IOException {
@@ -62,9 +72,9 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
         try {
             Epic epic = manager.getEpic(id);
             String response = gson.toJson(epic);
-            sendResponce(exchange, response, HttpURLConnection.HTTP_OK);
+            sendResponse(exchange, response, HttpURLConnection.HTTP_OK);
         } catch (NotFoundException e) {
-            sendResponce(exchange, e.getMessage(), HttpURLConnection.HTTP_NOT_FOUND);
+            sendResponse(exchange, e.getMessage(), HttpURLConnection.HTTP_NOT_FOUND);
         }
     }
 
@@ -72,7 +82,7 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
     private void handleGetAll(HttpExchange exchange) throws IOException {
         Collection<Epic> epics = manager.getAllEpics();
         String response = gson.toJson(epics);
-        sendResponce(exchange, response, HttpURLConnection.HTTP_OK);
+        sendResponse(exchange, response, HttpURLConnection.HTTP_OK);
     }
 
     private void handleGetSubtasks(HttpExchange exchange) throws IOException {
@@ -80,9 +90,9 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
         try {
             Collection<Subtask> subtasks = manager.getEpicSubtasks(id);
             String response = gson.toJson(subtasks);
-            sendResponce(exchange, response, HttpURLConnection.HTTP_OK);
+            sendResponse(exchange, response, HttpURLConnection.HTTP_OK);
         } catch (NotFoundException e) {
-            sendResponce(exchange, e.getMessage(), HttpURLConnection.HTTP_NOT_FOUND);
+            sendResponse(exchange, e.getMessage(), HttpURLConnection.HTTP_NOT_FOUND);
         }
     }
 
@@ -90,14 +100,14 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
         String body = new String(exchange.getRequestBody().readAllBytes());
         Epic epic = gson.fromJson(body, Epic.class);
         manager.createEpic(epic);
-        sendResponce(exchange, "", HttpURLConnection.HTTP_CREATED);
+        sendResponse(exchange, "", HttpURLConnection.HTTP_CREATED);
     }
 
     private void handleUpdate(HttpExchange exchange) throws IOException {
         String body = new String(exchange.getRequestBody().readAllBytes());
         Epic epic = gson.fromJson(body, Epic.class);
         manager.updateEpic(epic);
-        sendResponce(exchange, "", HttpURLConnection.HTTP_CREATED);
+        sendResponse(exchange, "", HttpURLConnection.HTTP_CREATED);
 
     }
 
@@ -105,35 +115,12 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
         String[] pathParts = requestPath.split("/");
         int id = Integer.parseInt(pathParts[pathParts.length - 1]);
         manager.deleteEpic(id);
-        sendResponce(exchange, "", HttpURLConnection.HTTP_NO_CONTENT);
+        sendResponse(exchange, "", HttpURLConnection.HTTP_NO_CONTENT);
     }
 
     private void handleDeleteAll(HttpExchange exchange) throws IOException {
         manager.removeAllEpics();
-        sendResponce(exchange, "", HttpURLConnection.HTTP_NO_CONTENT);
-    }
-
-    private String getEndpoint(String requestPath, String requestMethod) {
-        String[] pathParts = requestPath.split("/");
-
-        if (pathParts.length == 2 && pathParts[1].equals("epics")) {
-            return switch (requestMethod) {
-                case "GET" -> TaskEndpoint.GET_ALL.name();
-                case "POST" -> TaskEndpoint.CREATE.name();
-                case "DELETE" -> TaskEndpoint.DELETE_ALL.name();
-                default -> TaskEndpoint.UNKNOWN.name();
-            };
-        } else if (pathParts.length == 3 && pathParts[1].equals("epics")) {
-            return switch (requestMethod) {
-                case "GET" -> TaskEndpoint.GET.name();
-                case "POST" -> TaskEndpoint.UPDATE.name();
-                case "DELETE" -> TaskEndpoint.DELETE.name();
-                default -> TaskEndpoint.UNKNOWN.name();
-            };
-        } else if (pathParts.length == 4 && pathParts[1].equals("epics") && pathParts[3].equals("subtasks")) {
-            return "GET_SUBTASKS";
-        }
-        return TaskEndpoint.UNKNOWN.name();
+        sendResponse(exchange, "", HttpURLConnection.HTTP_NO_CONTENT);
     }
 
 }

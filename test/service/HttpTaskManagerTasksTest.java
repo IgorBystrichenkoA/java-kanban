@@ -29,18 +29,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class HttpTaskManagerTasksTest {
 
-    TaskManager manager = new InMemoryTaskManager(new InMemoryHistoryManager());
-    HttpTaskServer taskServer = new HttpTaskServer(manager);
-    Gson gson = HttpTaskServer.getGson();
-
-    public HttpTaskManagerTasksTest() throws IOException {
-    }
+    TaskManager manager;
+    HttpTaskServer taskServer;
+    Gson gson;
 
     @BeforeEach
-    public void setUp() {
-        manager.removeAllTasks();
-        manager.removeAllEpics();
-        manager.removeAllSubtasks();
+    public void setUp() throws IOException {
+        manager = new InMemoryTaskManager(new InMemoryHistoryManager());
+        taskServer = new HttpTaskServer(manager);
+        gson = HttpTaskServer.getGson();
         taskServer.start();
     }
 
@@ -49,25 +46,36 @@ public class HttpTaskManagerTasksTest {
         taskServer.stop();
     }
 
+    private HttpResponse<String> getResponse(String requestUrl, String method, String body) throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create(requestUrl);
+        HttpRequest.Builder builder = HttpRequest.newBuilder(url);
+        switch (method) {
+            case "GET" -> builder.GET();
+            case "POST" -> builder.POST(HttpRequest.BodyPublishers.ofString(body));
+            case "DELETE" -> builder.DELETE();
+        }
+
+        return client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+    }
+
+    private HttpResponse<String> getResponse(String url, String method) throws IOException, InterruptedException {
+        return getResponse(url, method, null);
+    }
+
     @Test
     public void testAddTask() throws IOException, InterruptedException {
         Task task = new Task("Test task", "Testing task",
                 Status.NEW, LocalDateTime.now(), Duration.ofMinutes(5));
 
-        String taskJson = gson.toJson(task);
+        String url = "http://localhost:8080/tasks";
+        String method = "POST";
+        String body = gson.toJson(task);
 
-        HttpClient client = HttpClient.newHttpClient();
-        URI url = URI.create("http://localhost:8080/tasks");
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .POST(HttpRequest.BodyPublishers.ofString(taskJson))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode());
-
+        HttpResponse<String> response = getResponse(url, method, body);
         List<Task> tasksFromManager = manager.getAllTasks().stream().toList();
 
+        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode());
         assertNotNull(tasksFromManager, "Задачи не возвращаются");
         assertEquals(1, tasksFromManager.size(), "Некорректное количество задач");
         assertEquals("Test task", tasksFromManager.getFirst().getName(), "Некорректное имя задачи");
@@ -77,20 +85,14 @@ public class HttpTaskManagerTasksTest {
     public void testAddEpic() throws IOException, InterruptedException {
         Epic epic = new Epic("Test epic", "Testing epic");
 
-        String taskJson = gson.toJson(epic);
+        String url = "http://localhost:8080/epics";
+        String method = "POST";
+        String body = gson.toJson(epic);
 
-        HttpClient client = HttpClient.newHttpClient();
-        URI url = URI.create("http://localhost:8080/epics");
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .POST(HttpRequest.BodyPublishers.ofString(taskJson))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode());
-
+        HttpResponse<String> response = getResponse(url, method, body);
         List<Epic> tasksFromManager = manager.getAllEpics().stream().toList();
 
+        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode());
         assertNotNull(tasksFromManager, "Эпики не возвращаются");
         assertEquals(1, tasksFromManager.size(), "Некорректное количество эпиков");
         assertEquals("Test epic", tasksFromManager.getFirst().getName(), "Некорректное имя эпика");
@@ -101,20 +103,14 @@ public class HttpTaskManagerTasksTest {
         Epic epic = manager.createEpic(new Epic("Эпик 1", "Эпик"));
         Subtask subtask = new Subtask("Test subtask", "Testing subtask", Status.NEW, epic);
 
-        String taskJson = gson.toJson(subtask);
+        String url = "http://localhost:8080/subtasks";
+        String method = "POST";
+        String body = gson.toJson(subtask);
 
-        HttpClient client = HttpClient.newHttpClient();
-        URI url = URI.create("http://localhost:8080/subtasks");
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .POST(HttpRequest.BodyPublishers.ofString(taskJson))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode());
-
+        HttpResponse<String> response = getResponse(url, method, body);
         List<Subtask> tasksFromManager = manager.getAllSubtasks().stream().toList();
 
+        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode());
         assertNotNull(tasksFromManager, "Эпики не возвращаются");
         assertEquals(1, tasksFromManager.size(), "Некорректное количество подзадач");
         assertEquals("Test subtask", tasksFromManager.getFirst().getName(), "Некорректное имя подзадачи");
@@ -128,18 +124,13 @@ public class HttpTaskManagerTasksTest {
         manager.createTask(task1);
         manager.createTask(task2);
 
-        HttpClient client = HttpClient.newHttpClient();
-        URI url = URI.create("http://localhost:8080/tasks/1");
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .DELETE()
-                .build();
+        String url = "http://localhost:8080/tasks/1";
+        String method = "DELETE";
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(HttpURLConnection.HTTP_NO_CONTENT, response.statusCode());
-
+        HttpResponse<String> response = getResponse(url, method);
         List<Task> tasksFromManager = manager.getAllTasks().stream().toList();
 
+        assertEquals(HttpURLConnection.HTTP_NO_CONTENT, response.statusCode());
         assertNotNull(tasksFromManager, "Задачи не возвращаются");
         assertEquals(1, tasksFromManager.size(), "Некорректное количество задач");
         assertEquals("Test task2", tasksFromManager.getFirst().getName(), "Некорректное имя задачи");
@@ -153,18 +144,13 @@ public class HttpTaskManagerTasksTest {
         manager.createEpic(epic1);
         manager.createEpic(epic2);
 
-        HttpClient client = HttpClient.newHttpClient();
-        URI url = URI.create("http://localhost:8080/epics/1");
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .DELETE()
-                .build();
+        String url = "http://localhost:8080/epics/1";
+        String method = "DELETE";
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(HttpURLConnection.HTTP_NO_CONTENT, response.statusCode());
-
+        HttpResponse<String> response = getResponse(url, method);
         List<Epic> tasksFromManager = manager.getAllEpics().stream().toList();
 
+        assertEquals(HttpURLConnection.HTTP_NO_CONTENT, response.statusCode());
         assertNotNull(tasksFromManager, "Эпики не возвращаются");
         assertEquals(1, tasksFromManager.size(), "Некорректное количество эпиков");
         assertEquals("Test epic2", tasksFromManager.getFirst().getName(), "Некорректное имя эпика");
@@ -179,18 +165,13 @@ public class HttpTaskManagerTasksTest {
         manager.createSubtask(subtask1);
         manager.createSubtask(subtask2);
 
-        HttpClient client = HttpClient.newHttpClient();
-        URI url = URI.create("http://localhost:8080/subtasks/2");
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .DELETE()
-                .build();
+        String url = "http://localhost:8080/subtasks/2";
+        String method = "DELETE";
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(HttpURLConnection.HTTP_NO_CONTENT, response.statusCode());
-
+        HttpResponse<String> response = getResponse(url, method);
         List<Subtask> tasksFromManager = manager.getAllSubtasks().stream().toList();
 
+        assertEquals(HttpURLConnection.HTTP_NO_CONTENT, response.statusCode());
         assertNotNull(tasksFromManager, "Эпики не возвращаются");
         assertEquals(1, tasksFromManager.size(), "Некорректное количество подзадач");
         assertEquals("Test subtask2", tasksFromManager.getFirst().getName(), "Некорректное имя подзадачи");
@@ -209,14 +190,10 @@ public class HttpTaskManagerTasksTest {
         manager.getSubtask(3);
         manager.getTask(1);
 
-        HttpClient client = HttpClient.newHttpClient();
-        URI url = URI.create("http://localhost:8080/history");
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .GET()
-                .build();
+        String url = "http://localhost:8080/history";
+        String method = "GET";
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = getResponse(url, method);
         assertEquals(HttpURLConnection.HTTP_OK, response.statusCode());
 
         JsonElement jsonElement = JsonParser.parseString(response.body());
@@ -242,14 +219,10 @@ public class HttpTaskManagerTasksTest {
         manager.createTask(new Task("Test task2", "Testing task",
                 Status.NEW, some.plusHours(1), Duration.ofMinutes(5)));
 
-        HttpClient client = HttpClient.newHttpClient();
-        URI url = URI.create("http://localhost:8080/prioritized");
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .GET()
-                .build();
+        String url = "http://localhost:8080/prioritized";
+        String method = "GET";
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = getResponse(url, method);
         assertEquals(HttpURLConnection.HTTP_OK, response.statusCode());
 
         JsonElement jsonElement = JsonParser.parseString(response.body());
