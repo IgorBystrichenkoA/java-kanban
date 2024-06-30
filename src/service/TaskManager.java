@@ -1,5 +1,6 @@
 package service;
 
+import exception.NotFoundException;
 import exception.ValidateException;
 import model.Epic;
 import model.Subtask;
@@ -21,11 +22,11 @@ public interface TaskManager {
 
     void removeAllSubtasks();
 
-    Task getTask(Integer id);
+    Task getTask(Integer id) throws NotFoundException;
 
-    Epic getEpic(Integer id);
+    Epic getEpic(Integer id) throws NotFoundException;
 
-    Subtask getSubtask(Integer id);
+    Subtask getSubtask(Integer id) throws NotFoundException;
 
     Task createTask(Task task) throws ValidateException;
 
@@ -45,7 +46,7 @@ public interface TaskManager {
 
     void deleteSubtask(int id);
 
-    Collection<Subtask> getEpicSubtasks(int epicId);
+    Collection<Subtask> getEpicSubtasks(int epicId) throws NotFoundException;
 
     Collection<Task> getHistory();
 

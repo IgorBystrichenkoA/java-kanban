@@ -10,8 +10,7 @@ import java.util.stream.Collectors;
 
 public class Epic extends Task {
 
-    private final Collection<Subtask> subtasks = new HashSet<>();
-    private LocalDateTime endTime;
+    private final transient Collection<Subtask> subtasks = new HashSet<>();
 
     public Epic(String name, String description) {
         super(name, description, Status.NEW);
